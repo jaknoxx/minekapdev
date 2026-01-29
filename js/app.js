@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let players = [];
     let filteredPlayers = [];
     let currentSort = 'totalPoints';
-    let currentSortDirection = 'desc'; // Výchozí sestupně
+    let currentSortDirection = 'desc';
     
     // DOM elementy
     const playersTableBody = document.getElementById('playersTableBody');
@@ -75,6 +75,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Načtení dat
     async function loadPlayersData() {
         try {
+            console.log('Načítám data hráčů...');
+            
             // Načtení JSON souboru
             const response = await fetch('data/players.json');
             if (!response.ok) {
@@ -82,23 +84,31 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             players = await response.json();
             
+            console.log('Data načtena:', players.length, 'hráčů');
+            
             // Výpočet bodů a titlů pro každého hráče
             players.forEach(player => {
                 calculatePlayerStats(player);
             });
             
-            // OKRUH 1: Seřazení všech hráčů od nejlepšího po nejhoršího (podle bodů)
+            // DŮLEŽITÉ: Seřazení od nejlepšího po nejhoršího
             players.sort((a, b) => b.totalPoints - a.totalPoints);
             
-            // Inicializace - začínáme se seřazeným seznamem
+            console.log('Hráči seřazeni podle bodů:', players.map(p => ({ name: p.name, points: p.totalPoints })));
+            
+            // Inicializace
             filteredPlayers = [...players];
             
-            // OKRUH 2: Aktualizace statistik a vykreslení tabulky
+            // OKRUH 1: Aktualizace statistik
             updatePlayerStats();
+            
+            // OKRUH 2: Vykreslení tabulky
             renderPlayersTable();
             
-            // OKRUH 3: Nastavení aktivního tlačítka pro řazení podle bodů
+            // OKRUH 3: Nastavení aktivního tlačítka
             setActiveSortButton('totalPoints', 'desc');
+            
+            console.log('Tabulka vykreslena s', filteredPlayers.length, 'hráči');
             
         } catch (error) {
             console.error('Chyba při načítání dat:', error);
@@ -108,6 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 15px;"></i>
                         <h3>Chyba při načítání dat</h3>
                         <p>Soubor s daty hráčů nemohl být načten.</p>
+                        <p><small>${error.message}</small></p>
                     </td>
                 </tr>
             `;
@@ -134,6 +145,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Určení titlu
         player.title = getTitle(totalPoints);
+        
+        // Debug log
+        console.log(`Hráč ${player.name}: ${totalPoints} bodů, titul: ${player.title.name}`);
     }
     
     // Získání titlu na základě bodů
@@ -143,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return title;
             }
         }
-        return titleSystem[titleSystem.length - 1]; // Fallback
+        return titleSystem[titleSystem.length - 1];
     }
     
     // Nastavení aktivního tlačítka pro řazení
@@ -152,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
         sortButtons.forEach(btn => {
             btn.classList.remove('active');
             const icon = btn.querySelector('i');
-            icon.className = 'fas fa-sort-amount-down'; // Reset ikony
+            icon.className = 'fas fa-sort-amount-down';
         });
         
         // Najít a aktivovat správné tlačítko
@@ -167,6 +181,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Vykreslení tabulky hráčů
     function renderPlayersTable() {
+        console.log('Vykresluji tabulku s', filteredPlayers.length, 'hráči');
+        
         if (filteredPlayers.length === 0) {
             playersTableBody.innerHTML = `
                 <tr>
@@ -220,6 +236,11 @@ document.addEventListener('DOMContentLoaded', function() {
         playersTableBody.innerHTML = html;
         
         // Přidání event listenerů pro klikání na hráče
+        attachPlayerEventListeners();
+    }
+    
+    // Připojení event listenerů k hráčům
+    function attachPlayerEventListeners() {
         document.querySelectorAll('.player-row').forEach(row => {
             row.addEventListener('click', function() {
                 const playerName = this.getAttribute('data-player-name');
@@ -230,7 +251,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-        // Přidání event listenerů pro jména hráčů
         document.querySelectorAll('.player-name').forEach(nameElement => {
             nameElement.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -243,7 +263,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-        // Přidání event listenerů pro skiny hráčů
         document.querySelectorAll('.player-skin').forEach(skinElement => {
             skinElement.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -312,13 +331,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Zobrazení modalu
         playerModalOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden'; // Zamezení scrollování pod modalem
+        document.body.style.overflow = 'hidden';
     }
     
     // Zavření modalu
     function closePlayerModal() {
         playerModalOverlay.classList.remove('active');
-        document.body.style.overflow = ''; // Obnovení scrollování
+        document.body.style.overflow = '';
     }
     
     // Aktualizace statistik
@@ -326,7 +345,7 @@ document.addEventListener('DOMContentLoaded', function() {
         playerCount.textContent = filteredPlayers.length;
         
         if (filteredPlayers.length > 0) {
-            // Nejlepší hráč (první v seznamu, protože je seřazeno)
+            // Nejlepší hráč (první v seznamu)
             const bestPlayer = filteredPlayers[0];
             topPlayer.textContent = bestPlayer.name;
             
@@ -340,11 +359,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Seřazení hráčů podle aktuálního nastavení
+    function sortPlayers() {
+        console.log('Řadím hráče podle:', currentSort, 'směr:', currentSortDirection);
+        
+        filteredPlayers.sort((a, b) => {
+            let aValue, bValue;
+            
+            if (currentSort === 'name') {
+                aValue = a.name.toLowerCase();
+                bValue = b.name.toLowerCase();
+            } else {
+                aValue = a.totalPoints;
+                bValue = b.totalPoints;
+            }
+            
+            if (currentSortDirection === 'asc') {
+                return aValue > bValue ? 1 : -1;
+            } else {
+                return aValue < bValue ? 1 : -1;
+            }
+        });
+        
+        console.log('Seřazení dokončeno. První hráč:', filteredPlayers[0]?.name, 'body:', filteredPlayers[0]?.totalPoints);
+    }
+    
     // Filtrování hráčů
     function filterPlayers() {
         const searchTerm = playerSearch.value.toLowerCase();
         const selectedKit = kitFilter.value;
         const selectedTier = tierFilter.value;
+        
+        console.log('Filtruji hráče - hledání:', searchTerm, 'kit:', selectedKit, 'tier:', selectedTier);
         
         filteredPlayers = players.filter(player => {
             // Vyhledávání podle jména
@@ -371,38 +417,18 @@ document.addEventListener('DOMContentLoaded', function() {
             return true;
         });
         
+        console.log('Po filtraci:', filteredPlayers.length, 'hráčů');
+        
         // Seřazení podle aktuálního nastavení
         sortPlayers();
         renderPlayersTable();
         updatePlayerStats();
     }
     
-    // Seřazení hráčů podle aktuálního nastavení
-    function sortPlayers() {
-        filteredPlayers.sort((a, b) => {
-            let aValue, bValue;
-            
-            if (currentSort === 'name') {
-                aValue = a.name.toLowerCase();
-                bValue = b.name.toLowerCase();
-            } else if (currentSort === 'totalPoints') {
-                aValue = a.totalPoints;
-                bValue = b.totalPoints;
-            } else {
-                aValue = a[currentSort] || 0;
-                bValue = b[currentSort] || 0;
-            }
-            
-            if (currentSortDirection === 'asc') {
-                return aValue > bValue ? 1 : -1;
-            } else {
-                return aValue < bValue ? 1 : -1;
-            }
-        });
-    }
-    
     // Reset filtrů
     function resetFilters() {
+        console.log('Resetuji filtry');
+        
         playerSearch.value = '';
         kitFilter.value = 'all';
         tierFilter.value = 'all';
@@ -423,13 +449,15 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function() {
             const sortBy = this.getAttribute('data-sort');
             
+            console.log('Kliknuto na řazení:', sortBy);
+            
             // Pokud už je aktivní, změň směr
             if (this.classList.contains('active')) {
                 currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
             } else {
                 // Odstranit aktivní třídu z ostatních
                 currentSort = sortBy;
-                currentSortDirection = 'desc'; // Výchozí sestupně
+                currentSortDirection = 'desc';
             }
             
             // Aktualizovat aktivní tlačítko
@@ -484,5 +512,6 @@ document.addEventListener('DOMContentLoaded', function() {
     resetFiltersBtn.addEventListener('click', resetFilters);
     
     // Načtení dat při startu
+    console.log('Spouštím aplikaci...');
     loadPlayersData();
 });
