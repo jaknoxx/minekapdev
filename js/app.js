@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let players = [];
     let filteredPlayers = [];
     let currentSort = 'totalPoints';
-    let currentSortDirection = 'desc';
+    let currentSortDirection = 'desc'; // Výchozí sestupně
     
     // DOM elementy
     const playersTableBody = document.getElementById('playersTableBody');
@@ -82,15 +82,24 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             players = await response.json();
             
-            // Výpočet bodů a titlů
+            // Výpočet bodů a titlů pro každého hráče
             players.forEach(player => {
                 calculatePlayerStats(player);
             });
             
-            // Inicializace
+            // OKRUH 1: Seřazení všech hráčů od nejlepšího po nejhoršího (podle bodů)
+            players.sort((a, b) => b.totalPoints - a.totalPoints);
+            
+            // Inicializace - začínáme se seřazeným seznamem
             filteredPlayers = [...players];
+            
+            // OKRUH 2: Aktualizace statistik a vykreslení tabulky
             updatePlayerStats();
             renderPlayersTable();
+            
+            // OKRUH 3: Nastavení aktivního tlačítka pro řazení podle bodů
+            setActiveSortButton('totalPoints', 'desc');
+            
         } catch (error) {
             console.error('Chyba při načítání dat:', error);
             playersTableBody.innerHTML = `
@@ -135,6 +144,25 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         return titleSystem[titleSystem.length - 1]; // Fallback
+    }
+    
+    // Nastavení aktivního tlačítka pro řazení
+    function setActiveSortButton(sortBy, direction) {
+        // Odstranit aktivní třídu ze všech tlačítek
+        sortButtons.forEach(btn => {
+            btn.classList.remove('active');
+            const icon = btn.querySelector('i');
+            icon.className = 'fas fa-sort-amount-down'; // Reset ikony
+        });
+        
+        // Najít a aktivovat správné tlačítko
+        sortButtons.forEach(btn => {
+            if (btn.getAttribute('data-sort') === sortBy) {
+                btn.classList.add('active');
+                const icon = btn.querySelector('i');
+                icon.className = direction === 'asc' ? 'fas fa-sort-amount-up' : 'fas fa-sort-amount-down';
+            }
+        });
     }
     
     // Vykreslení tabulky hráčů
@@ -298,10 +326,8 @@ document.addEventListener('DOMContentLoaded', function() {
         playerCount.textContent = filteredPlayers.length;
         
         if (filteredPlayers.length > 0) {
-            // Nejlepší hráč
-            const bestPlayer = filteredPlayers.reduce((prev, current) => 
-                prev.totalPoints > current.totalPoints ? prev : current
-            );
+            // Nejlepší hráč (první v seznamu, protože je seřazeno)
+            const bestPlayer = filteredPlayers[0];
             topPlayer.textContent = bestPlayer.name;
             
             // Průměrný bod
@@ -345,13 +371,13 @@ document.addEventListener('DOMContentLoaded', function() {
             return true;
         });
         
-        // Seřazení
+        // Seřazení podle aktuálního nastavení
         sortPlayers();
         renderPlayersTable();
         updatePlayerStats();
     }
     
-    // Seřazení hráčů
+    // Seřazení hráčů podle aktuálního nastavení
     function sortPlayers() {
         filteredPlayers.sort((a, b) => {
             let aValue, bValue;
@@ -381,16 +407,16 @@ document.addEventListener('DOMContentLoaded', function() {
         kitFilter.value = 'all';
         tierFilter.value = 'all';
         filteredPlayers = [...players];
+        
+        // Resetovat na výchozí řazení podle bodů sestupně
+        currentSort = 'totalPoints';
+        currentSortDirection = 'desc';
+        setActiveSortButton('totalPoints', 'desc');
+        
         sortPlayers();
         renderPlayersTable();
         updatePlayerStats();
     }
-    
-    // Události
-    playerSearch.addEventListener('input', filterPlayers);
-    kitFilter.addEventListener('change', filterPlayers);
-    tierFilter.addEventListener('change', filterPlayers);
-    resetFiltersBtn.addEventListener('click', resetFilters);
     
     // Události pro řazení
     sortButtons.forEach(button => {
@@ -402,16 +428,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
             } else {
                 // Odstranit aktivní třídu z ostatních
-                sortButtons.forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
                 currentSort = sortBy;
-                currentSortDirection = 'desc';
+                currentSortDirection = 'desc'; // Výchozí sestupně
             }
             
-            // Aktualizovat ikonu
-            const icon = this.querySelector('i');
-            icon.className = currentSortDirection === 'asc' ? 'fas fa-sort-amount-up' : 'fas fa-sort-amount-down';
+            // Aktualizovat aktivní tlačítko
+            setActiveSortButton(currentSort, currentSortDirection);
             
+            // Seřadit a překreslit
             sortPlayers();
             renderPlayersTable();
         });
@@ -453,6 +477,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Načtení dat
+    // Události pro filtry
+    playerSearch.addEventListener('input', filterPlayers);
+    kitFilter.addEventListener('change', filterPlayers);
+    tierFilter.addEventListener('change', filterPlayers);
+    resetFiltersBtn.addEventListener('click', resetFilters);
+    
+    // Načtení dat při startu
     loadPlayersData();
 });
