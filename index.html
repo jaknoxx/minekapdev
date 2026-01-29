@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minekap Tier List</title>
+    <title>MineKap Tier List</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="https://mc-heads.net/avatar/jaknox/64">
 </head>
 <body>
     <!-- Header -->
@@ -16,7 +15,7 @@
             <div class="header-top">
                 <div class="logo-section">
                     <div class="server-logo">
-                        <img src="https://mc-heads.net/avatar/jaknox/100" alt="MineKap Logo" class="logo-img">
+                        <div class="logo-emoji">🏆</div>
                         <h1 class="logo-text">MineKap <span class="highlight">Tier List</span></h1>
                     </div>
                     <div class="server-owner">
@@ -59,7 +58,7 @@
                         </div>
                         <div class="info-item">
                             <h3><i class="fas fa-gem"></i> Cosmetics</h3>
-                            <p>Tags, kill sounds, chat colors and more</p>
+                            <p>Traily, částice, křídla a více</p>
                         </div>
                         <div class="info-item">
                             <h3><i class="fas fa-trophy"></i> Kity</h3>
@@ -142,8 +141,8 @@
                         <span class="stat-value" id="topPlayer">-</span>
                     </div>
                     <div class="stat-box">
-                        <span class="stat-label">Průměrný tier:</span>
-                        <span class="stat-value" id="avgTier">-</span>
+                        <span class="stat-label">Průměrný bod:</span>
+                        <span class="stat-value" id="avgPoints">-</span>
                     </div>
                 </div>
             </div>
@@ -197,9 +196,6 @@
                             <span class="legend-color retier"></span>
                             <span class="legend-text">Retier (stejné body jako normální tier)</span>
                         </div>
-                    </div>
-                    <div class="data-info">
-                        <p><i class="fas fa-sync-alt"></i> Data se načítají z <code>players.json</code></p>
                     </div>
                 </div>
             </div>
@@ -290,8 +286,8 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-info">
-                    <p><i class="fas fa-code"></i> Vytvořeno pro <strong>Minekap.eu</strong></p>
-                    <p><i class="far fa-copyright"></i> Tier List System</p>
+                    <p><i class="fas fa-code"></i> Vytvořeno pro <strong>MineKap.eu</strong></p>
+                    <p><i class="far fa-copyright"></i> 2024 Tier List System</p>
                 </div>
                 <div class="footer-links">
                     <a href="https://mc.minekap.eu" target="_blank">mc.minekap.eu</a>
@@ -302,10 +298,17 @@
         </div>
     </footer>
 
-    <!-- Skrytá část pro vývojáře -->
-    <div class="dev-info" style="display: none;">
-        <p><strong>Pro přidání/úpravu hráčů:</strong> Upravte soubor <code>data/players.json</code></p>
-        <p><strong>Retier systém:</strong> Pouze pro LT3+ (RLT3, RHT3, RLT2, RHT2, RLT1, RHT1) se stejným bodovým hodnocením jako normální tier</p>
+    <!-- Modal pro profil hráče -->
+    <div class="modal-overlay" id="playerModalOverlay">
+        <div class="player-modal" id="playerModal">
+            <button class="modal-close-btn" id="modalCloseBtn">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="player-modal-content" id="playerModalContent">
+                <!-- Obsah se naplní dynamicky -->
+            </div>
+        </div>
     </div>
 
     <script src="js/app.js"></script>
