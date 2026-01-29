@@ -563,16 +563,16 @@ h1, h2, h3, h4 {
 }
 
 /* Barvy tierů */
-.tier-LT5 { background-color: var(--tier-lt5); color: white; }
-.tier-HT5 { background-color: var(--tier-ht5); color: white; }
-.tier-LT4 { background-color: var(--tier-lt4); color: white; }
+.tier-LT5 { background-color: var(--tier-lt5); color: black; }
+.tier-HT5 { background-color: var(--tier-ht5); color: black; }
+.tier-LT4 { background-color: var(--tier-lt4); color: black; }
 .tier-HT4 { background-color: var(--tier-ht4); color: black; }
 .tier-LT3 { background-color: var(--tier-lt3); color: black; }
 .tier-HT3 { background-color: var(--tier-ht3); color: black; }
 .tier-LT2 { background-color: var(--tier-lt2); color: black; }
 .tier-HT2 { background-color: var(--tier-ht2); color: black; }
-.tier-LT1 { background-color: var(--tier-lt1); color: white; }
-.tier-HT1 { background-color: var(--tier-ht1); color: white; }
+.tier-LT1 { background-color: var(--tier-lt1); color: black; }
+.tier-HT1 { background-color: var(--tier-ht1); color: black; }
 
 /* Retier styly */
 .tier-RLT3, .tier-RHT3, .tier-RLT2, .tier-RHT2, .tier-RLT1, .tier-RHT1 {
