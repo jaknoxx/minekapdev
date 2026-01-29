@@ -90,10 +90,15 @@ h1, h2, h3, h4 {
     gap: 15px;
 }
 
-.logo-img {
+.logo-emoji {
+    font-size: 3rem;
     width: 70px;
     height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
     border: 3px solid var(--light);
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
 }
@@ -463,10 +468,11 @@ h1, h2, h3, h4 {
 .players-table tbody tr {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     transition: background 0.3s;
+    cursor: pointer;
 }
 
 .players-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .players-table td {
@@ -501,12 +507,24 @@ h1, h2, h3, h4 {
     height: 50px;
     border-radius: 8px;
     border: 2px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.player-skin:hover {
+    transform: scale(1.05);
 }
 
 .player-name {
     font-weight: bold;
     font-size: 1.1rem;
     color: white;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.player-name:hover {
+    color: var(--secondary);
 }
 
 .title-col {
@@ -575,11 +593,6 @@ h1, h2, h3, h4 {
 
 .table-footer {
     margin-top: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
     padding-top: 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -609,21 +622,6 @@ h1, h2, h3, h4 {
 .legend-text {
     font-size: 0.9rem;
     color: var(--gray);
-}
-
-.data-info {
-    font-size: 0.9rem;
-    color: var(--gray);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.data-info code {
-    background: rgba(0, 0, 0, 0.3);
-    padding: 3px 6px;
-    border-radius: 4px;
-    font-family: monospace;
 }
 
 /* Points system */
@@ -744,6 +742,173 @@ h1, h2, h3, h4 {
     color: var(--secondary);
 }
 
+/* Modal pro profil hráče */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.player-modal {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    transform: translateY(20px);
+    transition: transform 0.3s;
+}
+
+.modal-overlay.active .player-modal {
+    transform: translateY(0);
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(231, 76, 60, 0.2);
+    border: 1px solid var(--accent);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    z-index: 10;
+    transition: all 0.3s;
+}
+
+.modal-close-btn:hover {
+    background: var(--accent);
+    transform: rotate(90deg);
+}
+
+.player-modal-content {
+    padding: 40px;
+}
+
+.player-profile-header {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.player-profile-avatar {
+    position: relative;
+}
+
+.profile-skin {
+    width: 100px;
+    height: 100px;
+    border-radius: 12px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.player-profile-info {
+    flex: 1;
+    min-width: 200px;
+}
+
+.player-profile-name {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 10px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.profile-title {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.profile-points {
+    font-size: 1.5rem;
+    color: var(--warning);
+    font-weight: bold;
+}
+
+.player-profile-details {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-details-title {
+    color: var(--secondary);
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.kits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 15px;
+}
+
+.kit-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.kit-name {
+    font-weight: 600;
+    color: var(--light);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.kit-tier-display {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.kit-points {
+    font-size: 0.9rem;
+    color: var(--gray);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .header-top {
@@ -775,6 +940,15 @@ h1, h2, h3, h4 {
         width: 40px;
         height: 40px;
     }
+    
+    .player-modal {
+        max-width: 95%;
+    }
+    
+    .player-profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
 }
 
 @media (max-width: 768px) {
@@ -800,8 +974,20 @@ h1, h2, h3, h4 {
         align-items: flex-start;
     }
     
-    .table-footer {
-        flex-direction: column;
-        align-items: flex-start;
+    .kits-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .player-modal-content {
+        padding: 25px 20px;
+    }
+    
+    .player-profile-name {
+        font-size: 1.8rem;
+    }
+    
+    .profile-skin {
+        width: 80px;
+        height: 80px;
     }
 }
