@@ -3,39 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft PVP Tierlist</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Minekap Tier List</title>
+    <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="https://mc-heads.net/avatar/jaknox/64">
 </head>
 <body>
-    <div class="container">
-        <h1><i class="fas fa-trophy"></i> Minecraft PVP Tierlist</h1>
-        <table id="tierlist">
-            <thead>
-                <tr>
-                    <th>Pořadí</th>
-                    <th>Hráč</th>
-                    <th>CpvP</th>
-                    <th>Axe</th>
-                    <th>Sword</th>
-                    <th>UHC</th>
-                    <th>Npot</th>
-                    <th>Pot</th>
-                    <th>SMP</th>
-                    <th>DiaSMP</th>
-                    <th>Mace</th>
-                    <th>Celkem bodů</th>
-                </tr>
-            </thead>
-            <tbody id="table-body">
-                <!-- Naplní se z JS -->
-            </tbody>
-        </table>
-        <div class="points-info">
-            <h3>Bodový systém:</h3>
-            <p>LT5=1, HT5=2, LT4=3, HT4=4, LT3=10, HT3=15, LT2=20, HT2=30, LT1=45, HT1=60</p>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo-section">
+                    <div class="server-logo">
+                        <img src="https://mc-heads.net/avatar/jaknox/100" alt="MineKap Logo" class="logo-img">
+                        <h1 class="logo-text">MineKap <span class="highlight">Tier List</span></h1>
+                    </div>
+                    <div class="server-owner">
+                        <span class="owner-label">Owner:</span>
+                        <span class="owner-name">jaknox</span>
+                    </div>
+                </div>
+                
+                <div class="server-info-section">
+                    <div class="server-ip-display">
+                        <i class="fas fa-server"></i>
+                        <code class="ip-address">mc.minekap.eu</code>
+                        <button class="copy-ip-btn" title="Kopírovat IP">
+                            <i class="far fa-copy"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="server-links">
+                        <a href="https://dsc.gg/minekap" class="btn discord-btn" target="_blank">
+                            <i class="fab fa-discord"></i> Discord
+                        </a>
+                        <a href="https://craftlist.org/minekap#vote" class="btn vote-btn" target="_blank">
+                            <i class="fas fa-vote-yea"></i> Vote
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Info panel -->
+            <div class="info-panel">
+                <button class="info-toggle-btn" id="infoToggle">
+                    <i class="fas fa-info-circle"></i> Informace o serveru
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="info-content" id="infoContent">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <h3><i class="fas fa-gamepad"></i> Typy her</h3>
+                            <p>Duels • FFA • Party</p>
+                        </div>
+                        <div class="info-item">
+                            <h3><i class="fas fa-gem"></i> Cosmetics</h3>
+                            <p>Tags, kill sounds, chat colors and more</p>
+                        </div>
+                        <div class="info-item">
+                            <h3><i class="fas fa-trophy"></i> Kity</h3>
+                            <p>Sword, Axe, UHC, DiaPot, NethPot, SMP, Crystal, Mace, Spear</p>
+                        </div>
+                        <div class="info-item">
+                            <h3><i class="fas fa-star"></i> Tier systém</h3>
+                            <p>LT5 až HT1 s bodovým hodnocením</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Kontrolní panel -->
+            <div class="control-panel">
+                <div class="search-section">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="playerSearch" placeholder="Hledat hráče...">
+                    </div>
+                </div>
+                
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label for="kitFilter"><i class="fas fa-filter"></i> Filtrovat podle kitu:</label>
+                        <select id="kitFilter" class="filter-select">
+                            <option value="all">Všechny kity</option>
+                            <option value="sword">Sword</option>
+                            <option value="axe">Axe</option>
+                            <option value="uhc">UHC</option>
+                            <option value="diapot">DiaPot</option>
+                            <option value="nethpot">NethPot</option>
+                            <option value="smp">SMP</option>
+                            <option value="crystal">Crystal</option>
+                            <option value="mace">Mace</option>
+                            <option value="spear">Spear</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="tierFilter"><i class="fas fa-layer-group"></i> Filtrovat podle tieru:</label>
+                        <select id="tierFilter" class="filter-select">
+                            <option value="all">Všechny tiery</option>
+                            <option value="LT5">LT5</option>
+                            <option value="HT5">HT5</option>
+                            <option value="LT4">LT4</option>
+                            <option value="HT4">HT4</option>
+                            <option value="LT3">LT3</option>
+                            <option value="HT3">HT3</option>
+                            <option value="LT2">LT2</option>
+                            <option value="HT2">HT2</option>
+                            <option value="LT1">LT1</option>
+                            <option value="HT1">HT1</option>
+                            <option value="RLT3">RLT3 (Retier)</option>
+                            <option value="RHT3">RHT3 (Retier)</option>
+                            <option value="RLT2">RLT2 (Retier)</option>
+                            <option value="RHT2">RHT2 (Retier)</option>
+                            <option value="RLT1">RLT1 (Retier)</option>
+                            <option value="RHT1">RHT1 (Retier)</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn reset-filters-btn" id="resetFilters">
+                        <i class="fas fa-redo"></i> Resetovat filtry
+                    </button>
+                </div>
+                
+                <div class="stats-section">
+                    <div class="stat-box">
+                        <span class="stat-label">Počet hráčů:</span>
+                        <span class="stat-value" id="playerCount">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Nejlepší hráč:</span>
+                        <span class="stat-value" id="topPlayer">-</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Průměrný tier:</span>
+                        <span class="stat-value" id="avgTier">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hráči tabulka -->
+            <div class="players-table-container">
+                <div class="table-header">
+                    <h2><i class="fas fa-list-ol"></i> Žebříček hráčů</h2>
+                    <div class="sort-controls">
+                        <button class="sort-btn active" data-sort="totalPoints">
+                            <i class="fas fa-sort-amount-down"></i> Podle bodů
+                        </button>
+                        <button class="sort-btn" data-sort="name">
+                            <i class="fas fa-sort-alpha-down"></i> Podle jména
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="players-table" id="playersTable">
+                        <thead>
+                            <tr>
+                                <th class="rank-col">#</th>
+                                <th class="player-col">Hráč</th>
+                                <th class="title-col">Title</th>
+                                <th class="points-col">Body</th>
+                                <th class="kits-header" colspan="9">Kity</th>
+                            </tr>
+                            <tr class="kits-row">
+                                <th colspan="4"></th>
+                                <th class="kit-col">Sword</th>
+                                <th class="kit-col">Axe</th>
+                                <th class="kit-col">UHC</th>
+                                <th class="kit-col">DiaPot</th>
+                                <th class="kit-col">NethPot</th>
+                                <th class="kit-col">SMP</th>
+                                <th class="kit-col">Crystal</th>
+                                <th class="kit-col">Mace</th>
+                                <th class="kit-col">Spear</th>
+                            </tr>
+                        </thead>
+                        <tbody id="playersTableBody">
+                            <!-- Data se načtou z JSONu -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="table-footer">
+                    <div class="legend">
+                        <div class="legend-item">
+                            <span class="legend-color retier"></span>
+                            <span class="legend-text">Retier (stejné body jako normální tier)</span>
+                        </div>
+                    </div>
+                    <div class="data-info">
+                        <p><i class="fas fa-sync-alt"></i> Data se načítají z <code>players.json</code></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bodový systém -->
+            <div class="points-system">
+                <h3><i class="fas fa-calculator"></i> Bodový systém</h3>
+                <div class="points-grid">
+                    <div class="points-tier">
+                        <span class="tier-name">HT1</span>
+                        <span class="tier-points">60 bodů</span>
+                    </div>
+                    <div class="points-tier">
+                        <span class="tier-name">LT1</span>
+                        <span class="tier-points">45 bodů</span>
+                    </div>
+                    <div class="points-tier">
+                        <span class="tier-name">HT2</span>
+                        <span class="tier-points">30 bodů</span>
+                    </div>
+                    <div class="points-tier">
+                        <span class="tier-name">LT2</span>
+                        <span class="tier-points">20 bodů</span>
+                    </div>
+                    <div class="points-tier">
+                        <span class="tier-name">HT3</span>
+                        <span class="tier-points">15 bodů</span>
+                    </div>
+                    <div class="points-tier">
+                        <span class="tier-name">LT3</span>
+                        <span class="tier-points">10 bodů</span>
+                    </div>
+                    <div class="points-tier">
+                        <span class="tier-name">HT4</span>
+                        <span class="tier-points">4 body</span>
+                    </div>
+                    <div class="points-tier">
+                        <span class="tier-name">LT4</span>
+                        <span class="tier-points">3 body</span>
+                    </div>
+                    <div class="points-tier">
+                        <span class="tier-name">HT5</span>
+                        <span class="tier-points">2 body</span>
+                    </div>
+                    <div class="points-tier">
+                        <span class="tier-name">LT5</span>
+                        <span class="tier-points">1 bod</span>
+                    </div>
+                </div>
+                
+                <h3><i class="fas fa-medal"></i> Title systém</h3>
+                <div class="titles-grid">
+                    <div class="title-item" style="background-color: #95a5a6;">
+                        <span class="title-name">Rookie</span>
+                        <span class="title-range">0-10 bodů</span>
+                    </div>
+                    <div class="title-item" style="background-color: #7bed9f;">
+                        <span class="title-name">Combat Novice</span>
+                        <span class="title-range">10-15 bodů</span>
+                    </div>
+                    <div class="title-item" style="background-color: #70a1ff;">
+                        <span class="title-name">Combat Cadet</span>
+                        <span class="title-range">15-50 bodů</span>
+                    </div>
+                    <div class="title-item" style="background-color: #ff9ff3;">
+                        <span class="title-name">Combat Specialist</span>
+                        <span class="title-range">50-100 bodů</span>
+                    </div>
+                    <div class="title-item" style="background-color: #ff6b6b;">
+                        <span class="title-name">Combat Ace</span>
+                        <span class="title-range">100-250 bodů</span>
+                    </div>
+                    <div class="title-item" style="background-color: #f39c12;">
+                        <span class="title-name">Combat Master</span>
+                        <span class="title-range">250-350 bodů</span>
+                    </div>
+                    <div class="title-item" style="background-color: #f1c40f;">
+                        <span class="title-name">Combat Grandmaster</span>
+                        <span class="title-range">350+ bodů</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <p><i class="fas fa-code"></i> Vytvořeno pro <strong>Minekap.eu</strong></p>
+                    <p><i class="far fa-copyright"></i> Tier List System</p>
+                </div>
+                <div class="footer-links">
+                    <a href="https://mc.minekap.eu" target="_blank">mc.minekap.eu</a>
+                    <a href="https://dsc.gg/minekap" target="_blank">Discord</a>
+                    <a href="https://craftlist.org/minekap#vote" target="_blank">Vote</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Skrytá část pro vývojáře -->
+    <div class="dev-info" style="display: none;">
+        <p><strong>Pro přidání/úpravu hráčů:</strong> Upravte soubor <code>data/players.json</code></p>
+        <p><strong>Retier systém:</strong> Pouze pro LT3+ (RLT3, RHT3, RLT2, RHT2, RLT1, RHT1) se stejným bodovým hodnocením jako normální tier</p>
     </div>
-    <script src="script.js"></script>
+
+    <script src="js/app.js"></script>
 </body>
 </html>
