@@ -14,11 +14,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const resetFiltersBtn = document.getElementById('resetFilters');
     const playerCount = document.getElementById('playerCount');
     const topPlayer = document.getElementById('topPlayer');
-    const avgTier = document.getElementById('avgTier');
+    const avgPoints = document.getElementById('avgPoints');
     const sortButtons = document.querySelectorAll('.sort-btn');
     const infoToggle = document.getElementById('infoToggle');
     const infoContent = document.getElementById('infoContent');
     const copyIpBtn = document.querySelector('.copy-ip-btn');
+    
+    // Modal elementy
+    const playerModalOverlay = document.getElementById('playerModalOverlay');
+    const playerModal = document.getElementById('playerModal');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const playerModalContent = document.getElementById('playerModalContent');
     
     // Bodovací systém
     const pointSystem = {
@@ -54,6 +60,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Kity v pořadí
     const kits = ['sword', 'axe', 'uhc', 'diapot', 'nethpot', 'smp', 'crystal', 'mace', 'spear'];
+    const kitNames = {
+        'sword': 'Sword',
+        'axe': 'Axe', 
+        'uhc': 'UHC',
+        'diapot': 'DiaPot',
+        'nethpot': 'NethPot',
+        'smp': 'SMP',
+        'crystal': 'Crystal',
+        'mace': 'Mace',
+        'spear': 'Spear'
+    };
     
     // Načtení dat
     async function loadPlayersData() {
@@ -81,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td colspan="13" style="text-align: center; padding: 40px; color: #e74c3c;">
                         <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 15px;"></i>
                         <h3>Chyba při načítání dat</h3>
-                        <p>Data hráčů nemohla být načtena. Zkontrolujte soubor <code>data/players.json</code>.</p>
+                        <p>Soubor s daty hráčů nemohl být načten.</p>
                     </td>
                 </tr>
             `;
@@ -139,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         filteredPlayers.forEach((player, index) => {
             html += `
-                <tr>
+                <tr class="player-row" data-player-name="${player.name}">
                     <td class="rank-col">${index + 1}</td>
                     <td class="player-col">
                         <div class="player-info">
@@ -173,6 +190,107 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         playersTableBody.innerHTML = html;
+        
+        // Přidání event listenerů pro klikání na hráče
+        document.querySelectorAll('.player-row').forEach(row => {
+            row.addEventListener('click', function() {
+                const playerName = this.getAttribute('data-player-name');
+                const player = players.find(p => p.name === playerName);
+                if (player) {
+                    showPlayerProfile(player);
+                }
+            });
+        });
+        
+        // Přidání event listenerů pro jména hráčů
+        document.querySelectorAll('.player-name').forEach(nameElement => {
+            nameElement.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const row = this.closest('.player-row');
+                const playerName = row.getAttribute('data-player-name');
+                const player = players.find(p => p.name === playerName);
+                if (player) {
+                    showPlayerProfile(player);
+                }
+            });
+        });
+        
+        // Přidání event listenerů pro skiny hráčů
+        document.querySelectorAll('.player-skin').forEach(skinElement => {
+            skinElement.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const row = this.closest('.player-row');
+                const playerName = row.getAttribute('data-player-name');
+                const player = players.find(p => p.name === playerName);
+                if (player) {
+                    showPlayerProfile(player);
+                }
+            });
+        });
+    }
+    
+    // Zobrazení profilu hráče
+    function showPlayerProfile(player) {
+        // Vytvoření obsahu modalu
+        let modalHTML = `
+            <div class="player-profile-header">
+                <div class="player-profile-avatar">
+                    <img src="https://mc-heads.net/avatar/${player.name}/100" 
+                         alt="${player.name}" 
+                         class="profile-skin"
+                         onerror="this.src='https://mc-heads.net/avatar/Steve/100'">
+                </div>
+                <div class="player-profile-info">
+                    <h2 class="player-profile-name">${player.name}</h2>
+                    <div class="profile-title" style="background-color: ${player.title.color}; color: ${player.title.name.includes('Novice') || player.title.name.includes('Cadet') ? 'black' : 'white'}">
+                        ${player.title.name}
+                    </div>
+                    <div class="profile-points">${player.totalPoints} bodů</div>
+                </div>
+            </div>
+            
+            <div class="player-profile-details">
+                <h3 class="profile-details-title">
+                    <i class="fas fa-layer-group"></i> Tiery v kitech
+                </h3>
+                <div class="kits-grid">
+        `;
+        
+        // Přidání všech kitů
+        kits.forEach(kit => {
+            const tier = player[kit] || '-';
+            const points = player[`${kit}Points`] || 0;
+            const tierClass = tier !== '-' ? `tier-${tier}` : '';
+            const kitName = kitNames[kit];
+            
+            modalHTML += `
+                <div class="kit-item">
+                    <div class="kit-name">
+                        <span>${kitName}</span>
+                        ${tier !== '-' ? `<span class="kit-tier-display ${tierClass}">${tier}</span>` : ''}
+                    </div>
+                    <div class="kit-points">${points} bodů</div>
+                </div>
+            `;
+        });
+        
+        modalHTML += `
+                </div>
+            </div>
+        `;
+        
+        // Nastavení obsahu modalu
+        playerModalContent.innerHTML = modalHTML;
+        
+        // Zobrazení modalu
+        playerModalOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Zamezení scrollování pod modalem
+    }
+    
+    // Zavření modalu
+    function closePlayerModal() {
+        playerModalOverlay.classList.remove('active');
+        document.body.style.overflow = ''; // Obnovení scrollování
     }
     
     // Aktualizace statistik
@@ -186,12 +304,13 @@ document.addEventListener('DOMContentLoaded', function() {
             );
             topPlayer.textContent = bestPlayer.name;
             
-            // Průměrný tier (zjednodušeně)
-            const avgPoints = filteredPlayers.reduce((sum, player) => sum + player.totalPoints, 0) / filteredPlayers.length;
-            avgTier.textContent = Math.round(avgPoints);
+            // Průměrný bod
+            const totalPoints = filteredPlayers.reduce((sum, player) => sum + player.totalPoints, 0);
+            const avg = totalPoints / filteredPlayers.length;
+            avgPoints.textContent = Math.round(avg);
         } else {
             topPlayer.textContent = '-';
-            avgTier.textContent = '-';
+            avgPoints.textContent = '-';
         }
     }
     
@@ -315,6 +434,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.innerHTML = originalIcon;
             }, 2000);
         });
+    });
+    
+    // Modal události
+    modalCloseBtn.addEventListener('click', closePlayerModal);
+    
+    // Zavření modalu kliknutím mimo obsah
+    playerModalOverlay.addEventListener('click', function(e) {
+        if (e.target === playerModalOverlay) {
+            closePlayerModal();
+        }
+    });
+    
+    // Zavření modalu klávesou ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && playerModalOverlay.classList.contains('active')) {
+            closePlayerModal();
+        }
     });
     
     // Načtení dat
