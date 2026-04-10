@@ -33,10 +33,15 @@ const KITS = [
 ];
 
 const PLAYERS_DATA = [
-    { "name": "ItzRealMe", "sword": "HT3", "axe": "HT1", "uhc": "HT1", "diapot": "HT1", "nethpot": "HT1", "smp": "LT2", "crystal": "LT2", "mace": "LT2", "spear": "" },
-    { "name": "coldified", "sword": "LT1", "axe": "LT1", "uhc": "LT1", "diapot": "LT1", "nethpot": "LT1", "smp": "HT2", "crystal": "LT3", "mace": "HT1", "spear": "LT2" },
-    { "name": "Swight", "sword": "HT1", "axe": "HT1", "uhc": "LT2", "diapot": "LT2", "nethpot": "HT3", "smp": "LT3", "crystal": "HT1", "mace": "LT2", "spear": "" },
-    { "name": "janekv", "sword": "HT2", "axe": "LT2", "uhc": "HT3", "diapot": "LT3", "nethpot": "LT3", "smp": "HT1", "crystal": "HT1", "mace": "LT2", "spear": "" },
-    { "name": "BlvckWlf", "sword": "HT2", "axe": "LT2", "uhc": "HT3", "diapot": "LT3", "nethpot": "LT3", "smp": "HT1", "crystal": "HT1", "mace": "LT2", "spear": "" },
-    { "name": "Kylaz", "sword": "HT1", "axe": "LT1", "uhc": "HT3", "diapot": "LT3", "nethpot": "LT3", "smp": "HT1", "crystal": "LT2", "mace": "", "spear": "" },
-    { "name": "jaknox", "sword": "LT3", "axe": "LT3", "uhc": "HT4", "diapot": "HT4", "nethpot": "HT4", "smp": "HT4", "crystal": "HT4",
+    { "name": "jaknox", "sword": "LT3", "axe": "LT3", "uhc": "HT4", "diapot": "HT4", "nethpot": "HT4", "smp": "HT4", "crystal": "HT4", "mace": "LT4", "spear": "LT3" },
+    { "name": "YT_lacjim168", "sword": "LT3", "axe": "LT4", "uhc": "", "diapot": "LT5", "nethpot": "LT5", "smp": "", "crystal": "", "mace": "HT5", "spear": "HT5" },
+    { "name": "citronyx1", "sword": "HT5", "axe": "LT5", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "LT5", "mace": "HT5", "spear": "" },
+    { "name": "Jirkafogus", "sword": "HT4", "axe": "HT4", "uhc": "LT3", "diapot": "HT4", "nethpot": "", "smp": "LT3", "crystal": "HT5", "mace": "", "spear": "LT3" },
+    { "name": "SetProfile", "sword": "LT3", "axe": "", "uhc": "", "diapot": "", "nethpot": "LT4", "smp": "", "crystal": "LT5", "mace": "HT5", "spear": "LT5" },
+    { "name": "FaZeTraRanTula", "sword": "HT3", "axe": "", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "", "mace": "HT5", "spear": "" },
+    { "name": "ItzLunas", "sword": "LT4", "axe": "", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "LT4", "mace": "", "spear": "" },
+    { "name": "Vojtas_", "sword": "HT4", "axe": "", "uhc": "HT5", "diapot": "", "nethpot": "", "smp": "HT5", "crystal": "", "mace": "HT5", "spear": "" },
+    { "name": "doge_cg", "sword": "", "axe": "LT4", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "", "mace": "", "spear": "" },
+    { "name": "vlk_1", "sword": "LT5", "axe": "", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "", "mace": "", "spear": "" },
+    { "name": "Terry885522", "sword": "LT5", "axe": "", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "", "mace": "", "spear": "LT5" }
+];
