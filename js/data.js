@@ -2,6 +2,7 @@
 // PLAYER DATA & CONFIGURATION
 // ========================================
 
+// Bodový systém
 const POINTS_SYSTEM = {
     'HT1': 60, 'LT1': 45,
     'HT2': 30, 'LT2': 20,
@@ -10,6 +11,7 @@ const POINTS_SYSTEM = {
     'HT5': 2,  'LT5': 1
 };
 
+// Title systém
 const TITLES = [
     { min: 0, max: 10, name: 'Rookie', color: '#95a5a6' },
     { min: 10, max: 15, name: 'Combat Novice', color: '#7bed9f' },
@@ -20,6 +22,7 @@ const TITLES = [
     { min: 350, max: Infinity, name: 'Combat Grandmaster', color: '#f1c40f' }
 ];
 
+// Seznam kitů (gamemodů)
 const KITS = [
     { id: 'sword', name: '⚔️ Sword', display: 'Sword' },
     { id: 'axe', name: '🪓 Axe', display: 'Axe' },
@@ -32,6 +35,7 @@ const KITS = [
     { id: 'spear', name: '🏹 Spear', display: 'Spear' }
 ];
 
+// Data hráčů (z tvého JSONu)
 const PLAYERS_DATA = [
     { "name": "jaknox", "sword": "LT3", "axe": "LT3", "uhc": "HT4", "diapot": "HT4", "nethpot": "HT4", "smp": "HT4", "crystal": "HT4", "mace": "LT4", "spear": "LT3" },
     { "name": "YT_lacjim168", "sword": "LT3", "axe": "LT4", "uhc": "", "diapot": "LT5", "nethpot": "LT5", "smp": "", "crystal": "", "mace": "HT5", "spear": "HT5" },
@@ -41,7 +45,7 @@ const PLAYERS_DATA = [
     { "name": "FaZeTraRanTula", "sword": "HT3", "axe": "", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "", "mace": "HT5", "spear": "" },
     { "name": "ItzLunas", "sword": "LT4", "axe": "", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "LT4", "mace": "", "spear": "" },
     { "name": "Vojtas_", "sword": "HT4", "axe": "", "uhc": "HT5", "diapot": "", "nethpot": "", "smp": "HT5", "crystal": "", "mace": "HT5", "spear": "" },
-    { "name": "doge_cg", "sword": "", "axe": "LT4", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "", "mace": "", "spear": "" },
     { "name": "vlk_1", "sword": "LT5", "axe": "", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "", "mace": "", "spear": "" },
+    { "name": "doge_cg", "sword": "", "axe": "LT4", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "", "mace": "", "spear": "" },
     { "name": "Terry885522", "sword": "LT5", "axe": "", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "", "mace": "", "spear": "LT5" }
 ];
