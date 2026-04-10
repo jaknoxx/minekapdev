@@ -1,517 +1,296 @@
-// Hlavní aplikace
-document.addEventListener('DOMContentLoaded', function() {
-    // Globální proměnné
-    let players = [];
-    let filteredPlayers = [];
-    let currentSort = 'totalPoints';
-    let currentSortDirection = 'desc';
-    
-    // DOM elementy
-    const playersTableBody = document.getElementById('playersTableBody');
-    const playerSearch = document.getElementById('playerSearch');
-    const kitFilter = document.getElementById('kitFilter');
-    const tierFilter = document.getElementById('tierFilter');
-    const resetFiltersBtn = document.getElementById('resetFilters');
-    const playerCount = document.getElementById('playerCount');
-    const topPlayer = document.getElementById('topPlayer');
-    const avgPoints = document.getElementById('avgPoints');
-    const sortButtons = document.querySelectorAll('.sort-btn');
-    const infoToggle = document.getElementById('infoToggle');
-    const infoContent = document.getElementById('infoContent');
-    const copyIpBtn = document.querySelector('.copy-ip-btn');
-    
-    // Modal elementy
-    const playerModalOverlay = document.getElementById('playerModalOverlay');
-    const playerModal = document.getElementById('playerModal');
-    const modalCloseBtn = document.getElementById('modalCloseBtn');
-    const playerModalContent = document.getElementById('playerModalContent');
-    
-    // Bodovací systém
-    const pointSystem = {
-        'LT5': 1,
-        'HT5': 2,
-        'LT4': 3,
-        'HT4': 4,
-        'LT3': 10,
-        'HT3': 15,
-        'LT2': 20,
-        'HT2': 30,
-        'LT1': 45,
-        'HT1': 60,
-        // Retier mají stejné body jako normální tier
-        'RLT3': 10,
-        'RHT3': 15,
-        'RLT2': 20,
-        'RHT2': 30,
-        'RLT1': 45,
-        'RHT1': 60
-    };
-    
-    // Title systém
-    const titleSystem = [
-        { min: 0, max: 10, name: 'Rookie', color: '#95a5a6' },
-        { min: 10, max: 15, name: 'Combat Novice', color: '#7bed9f' },
-        { min: 15, max: 50, name: 'Combat Cadet', color: '#70a1ff' },
-        { min: 50, max: 100, name: 'Combat Specialist', color: '#ff9ff3' },
-        { min: 100, max: 250, name: 'Combat Ace', color: '#ff6b6b' },
-        { min: 250, max: 350, name: 'Combat Master', color: '#f39c12' },
-        { min: 350, max: Infinity, name: 'Combat Grandmaster', color: '#f1c40f' }
-    ];
-    
-    // Kity v pořadí
-    const kits = ['sword', 'axe', 'uhc', 'diapot', 'nethpot', 'smp', 'crystal', 'mace', 'spear'];
-    const kitNames = {
-        'sword': 'Sword',
-        'axe': 'Axe', 
-        'uhc': 'UHC',
-        'diapot': 'DiaPot',
-        'nethpot': 'NethPot',
-        'smp': 'SMP',
-        'crystal': 'Crystal',
-        'mace': 'Mace',
-        'spear': 'Spear'
-    };
-    
-    // Načtení dat
-    async function loadPlayersData() {
-        try {
-            console.log('Načítám data hráčů...');
-            
-            // Načtení JSON souboru
-            const response = await fetch('data/players.json');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            players = await response.json();
-            
-            console.log('Data načtena:', players.length, 'hráčů');
-            
-            // Výpočet bodů a titlů pro každého hráče
-            players.forEach(player => {
-                calculatePlayerStats(player);
-            });
-            
-            // DŮLEŽITÉ: Seřazení od nejlepšího po nejhoršího
-            players.sort((a, b) => b.totalPoints - a.totalPoints);
-            
-            console.log('Hráči seřazeni podle bodů:', players.map(p => ({ name: p.name, points: p.totalPoints })));
-            
-            // Inicializace
-            filteredPlayers = [...players];
-            
-            // OKRUH 1: Aktualizace statistik
-            updatePlayerStats();
-            
-            // OKRUH 2: Vykreslení tabulky
-            renderPlayersTable();
-            
-            // OKRUH 3: Nastavení aktivního tlačítka
-            setActiveSortButton('totalPoints', 'desc');
-            
-            console.log('Tabulka vykreslena s', filteredPlayers.length, 'hráči');
-            
-        } catch (error) {
-            console.error('Chyba při načítání dat:', error);
-            playersTableBody.innerHTML = `
-                <tr>
-                    <td colspan="13" style="text-align: center; padding: 40px; color: #e74c3c;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 15px;"></i>
-                        <h3>Chyba při načítání dat</h3>
-                        <p>Soubor s daty hráčů nemohl být načten.</p>
-                        <p><small>${error.message}</small></p>
-                    </td>
-                </tr>
-            `;
-        }
+// ========================================
+// MAIN APPLICATION
+// ========================================
+
+let players = [];
+let filteredPlayers = [];
+let currentKit = 'overall';
+let currentSort = 'points';
+let currentSortDir = 'desc';
+let searchTerm = '';
+let selectedTier = 'all';
+
+// Helper functions
+function getTitle(points) {
+    for (const title of TITLES) {
+        if (points >= title.min && points < title.max) return title;
     }
-    
-    // Výpočet statistik hráče
-    function calculatePlayerStats(player) {
-        let totalPoints = 0;
-        
-        // Výpočet bodů pro každý kit
-        kits.forEach(kit => {
-            const tier = player[kit];
-            if (tier && pointSystem[tier]) {
-                player[`${kit}Points`] = pointSystem[tier];
-                totalPoints += pointSystem[tier];
-            } else {
-                player[`${kit}Points`] = 0;
-            }
-        });
-        
-        // Uložení celkových bodů
-        player.totalPoints = totalPoints;
-        
-        // Určení titlu
-        player.title = getTitle(totalPoints);
-        
-        // Debug log
-        console.log(`Hráč ${player.name}: ${totalPoints} bodů, titul: ${player.title.name}`);
-    }
-    
-    // Získání titlu na základě bodů
-    function getTitle(points) {
-        for (const title of titleSystem) {
-            if (points >= title.min && points < title.max) {
-                return title;
-            }
-        }
-        return titleSystem[titleSystem.length - 1];
-    }
-    
-    // Nastavení aktivního tlačítka pro řazení
-    function setActiveSortButton(sortBy, direction) {
-        // Odstranit aktivní třídu ze všech tlačítek
-        sortButtons.forEach(btn => {
-            btn.classList.remove('active');
-            const icon = btn.querySelector('i');
-            icon.className = 'fas fa-sort-amount-down';
-        });
-        
-        // Najít a aktivovat správné tlačítko
-        sortButtons.forEach(btn => {
-            if (btn.getAttribute('data-sort') === sortBy) {
-                btn.classList.add('active');
-                const icon = btn.querySelector('i');
-                icon.className = direction === 'asc' ? 'fas fa-sort-amount-up' : 'fas fa-sort-amount-down';
-            }
-        });
-    }
-    
-    // Vykreslení tabulky hráčů
-    function renderPlayersTable() {
-        console.log('Vykresluji tabulku s', filteredPlayers.length, 'hráči');
-        
-        if (filteredPlayers.length === 0) {
-            playersTableBody.innerHTML = `
-                <tr>
-                    <td colspan="13" style="text-align: center; padding: 40px;">
-                        <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 15px; opacity: 0.5;"></i>
-                        <h3>Žádní hráči nenalezeni</h3>
-                        <p>Zkuste změnit nebo resetovat filtry.</p>
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-        
-        let html = '';
-        
-        filteredPlayers.forEach((player, index) => {
-            html += `
-                <tr class="player-row" data-player-name="${player.name}">
-                    <td class="rank-col">${index + 1}</td>
-                    <td class="player-col">
-                        <div class="player-info">
-                            <div class="player-avatar">
-                                <img src="https://mc-heads.net/avatar/${player.name}/50" 
-                                     alt="${player.name}" 
-                                     class="player-skin"
-                                     onerror="this.src='https://mc-heads.net/avatar/Steve/50'">
-                            </div>
-                            <div>
-                                <div class="player-name">${player.name}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="title-col">
-                        <span class="player-title" style="background-color: ${player.title.color}; color: ${player.title.name.includes('Novice') || player.title.name.includes('Cadet') ? 'black' : 'white'}">
-                            ${player.title.name}
-                        </span>
-                    </td>
-                    <td class="points-col">${player.totalPoints}</td>
-            `;
-            
-            // Přidání tierů pro každý kit
-            kits.forEach(kit => {
-                const tier = player[kit] || '-';
-                const tierClass = tier !== '-' ? `tier-${tier}` : '';
-                html += `<td class="kit-col"><span class="kit-tier ${tierClass}">${tier}</span></td>`;
-            });
-            
-            html += `</tr>`;
-        });
-        
-        playersTableBody.innerHTML = html;
-        
-        // Přidání event listenerů pro klikání na hráče
-        attachPlayerEventListeners();
-    }
-    
-    // Připojení event listenerů k hráčům
-    function attachPlayerEventListeners() {
-        document.querySelectorAll('.player-row').forEach(row => {
-            row.addEventListener('click', function() {
-                const playerName = this.getAttribute('data-player-name');
-                const player = players.find(p => p.name === playerName);
-                if (player) {
-                    showPlayerProfile(player);
-                }
-            });
-        });
-        
-        document.querySelectorAll('.player-name').forEach(nameElement => {
-            nameElement.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const row = this.closest('.player-row');
-                const playerName = row.getAttribute('data-player-name');
-                const player = players.find(p => p.name === playerName);
-                if (player) {
-                    showPlayerProfile(player);
-                }
-            });
-        });
-        
-        document.querySelectorAll('.player-skin').forEach(skinElement => {
-            skinElement.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const row = this.closest('.player-row');
-                const playerName = row.getAttribute('data-player-name');
-                const player = players.find(p => p.name === playerName);
-                if (player) {
-                    showPlayerProfile(player);
-                }
-            });
-        });
-    }
-    
-    // Zobrazení profilu hráče
-    function showPlayerProfile(player) {
-        // Vytvoření obsahu modalu
-        let modalHTML = `
-            <div class="player-profile-header">
-                <div class="player-profile-avatar">
-                    <img src="https://mc-heads.net/avatar/${player.name}/100" 
-                         alt="${player.name}" 
-                         class="profile-skin"
-                         onerror="this.src='https://mc-heads.net/avatar/Steve/100'">
-                </div>
-                <div class="player-profile-info">
-                    <h2 class="player-profile-name">${player.name}</h2>
-                    <div class="profile-title" style="background-color: ${player.title.color}; color: ${player.title.name.includes('Novice') || player.title.name.includes('Cadet') ? 'black' : 'white'}">
-                        ${player.title.name}
-                    </div>
-                    <div class="profile-points">${player.totalPoints} bodů</div>
-                </div>
-            </div>
-            
-            <div class="player-profile-details">
-                <h3 class="profile-details-title">
-                    <i class="fas fa-layer-group"></i> Tiery v kitech
-                </h3>
-                <div class="kits-grid">
-        `;
-        
-        // Přidání všech kitů
-        kits.forEach(kit => {
-            const tier = player[kit] || '-';
-            const points = player[`${kit}Points`] || 0;
-            const tierClass = tier !== '-' ? `tier-${tier}` : '';
-            const kitName = kitNames[kit];
-            
-            modalHTML += `
-                <div class="kit-item">
-                    <div class="kit-name">
-                        <span>${kitName}</span>
-                        ${tier !== '-' ? `<span class="kit-tier-display ${tierClass}">${tier}</span>` : ''}
-                    </div>
-                    <div class="kit-points">${points} bodů</div>
-                </div>
-            `;
-        });
-        
-        modalHTML += `
-                </div>
-            </div>
-        `;
-        
-        // Nastavení obsahu modalu
-        playerModalContent.innerHTML = modalHTML;
-        
-        // Zobrazení modalu
-        playerModalOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-    
-    // Zavření modalu
-    function closePlayerModal() {
-        playerModalOverlay.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-    
-    // Aktualizace statistik
-    function updatePlayerStats() {
-        playerCount.textContent = filteredPlayers.length;
-        
-        if (filteredPlayers.length > 0) {
-            // Nejlepší hráč (první v seznamu)
-            const bestPlayer = filteredPlayers[0];
-            topPlayer.textContent = bestPlayer.name;
-            
-            // Průměrný bod
-            const totalPoints = filteredPlayers.reduce((sum, player) => sum + player.totalPoints, 0);
-            const avg = totalPoints / filteredPlayers.length;
-            avgPoints.textContent = Math.round(avg);
+    return TITLES[TITLES.length - 1];
+}
+
+function calculatePlayerStats(player) {
+    let totalPoints = 0;
+    KITS.forEach(kit => {
+        const tier = player[kit.id];
+        if (tier && POINTS_SYSTEM[tier]) {
+            player[`${kit.id}Points`] = POINTS_SYSTEM[tier];
+            totalPoints += POINTS_SYSTEM[tier];
         } else {
-            topPlayer.textContent = '-';
-            avgPoints.textContent = '-';
+            player[`${kit.id}Points`] = 0;
         }
-    }
-    
-    // Seřazení hráčů podle aktuálního nastavení
-    function sortPlayers() {
-        console.log('Řadím hráče podle:', currentSort, 'směr:', currentSortDirection);
-        
-        filteredPlayers.sort((a, b) => {
-            let aValue, bValue;
-            
-            if (currentSort === 'name') {
-                aValue = a.name.toLowerCase();
-                bValue = b.name.toLowerCase();
-            } else {
-                aValue = a.totalPoints;
-                bValue = b.totalPoints;
-            }
-            
-            if (currentSortDirection === 'asc') {
-                return aValue > bValue ? 1 : -1;
-            } else {
-                return aValue < bValue ? 1 : -1;
-            }
-        });
-        
-        console.log('Seřazení dokončeno. První hráč:', filteredPlayers[0]?.name, 'body:', filteredPlayers[0]?.totalPoints);
-    }
-    
-    // Filtrování hráčů
-    function filterPlayers() {
-        const searchTerm = playerSearch.value.toLowerCase();
-        const selectedKit = kitFilter.value;
-        const selectedTier = tierFilter.value;
-        
-        console.log('Filtruji hráče - hledání:', searchTerm, 'kit:', selectedKit, 'tier:', selectedTier);
-        
-        filteredPlayers = players.filter(player => {
-            // Vyhledávání podle jména
-            if (searchTerm && !player.name.toLowerCase().includes(searchTerm)) {
-                return false;
-            }
-            
-            // Filtrování podle kitu
-            if (selectedKit !== 'all' && (!player[selectedKit] || player[selectedKit] === '-')) {
-                return false;
-            }
-            
-            // Filtrování podle tieru
-            if (selectedTier !== 'all') {
+    });
+    player.totalPoints = totalPoints;
+    player.title = getTitle(totalPoints);
+    return player;
+}
+
+function initPlayers() {
+    players = PLAYERS_DATA.map(p => calculatePlayerStats({ ...p }));
+    filteredPlayers = [...players];
+}
+
+function filterPlayers() {
+    filteredPlayers = players.filter(player => {
+        if (searchTerm && !player.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+        if (selectedTier !== 'all') {
+            if (currentKit === 'overall') {
                 let hasTier = false;
-                kits.forEach(kit => {
-                    if (player[kit] === selectedTier) {
-                        hasTier = true;
-                    }
+                KITS.forEach(kit => {
+                    if (player[kit.id] === selectedTier) hasTier = true;
                 });
                 if (!hasTier) return false;
-            }
-            
-            return true;
-        });
-        
-        console.log('Po filtraci:', filteredPlayers.length, 'hráčů');
-        
-        // Seřazení podle aktuálního nastavení
-        sortPlayers();
-        renderPlayersTable();
-        updatePlayerStats();
-    }
-    
-    // Reset filtrů
-    function resetFilters() {
-        console.log('Resetuji filtry');
-        
-        playerSearch.value = '';
-        kitFilter.value = 'all';
-        tierFilter.value = 'all';
-        filteredPlayers = [...players];
-        
-        // Resetovat na výchozí řazení podle bodů sestupně
-        currentSort = 'totalPoints';
-        currentSortDirection = 'desc';
-        setActiveSortButton('totalPoints', 'desc');
-        
-        sortPlayers();
-        renderPlayersTable();
-        updatePlayerStats();
-    }
-    
-    // Události pro řazení
-    sortButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const sortBy = this.getAttribute('data-sort');
-            
-            console.log('Kliknuto na řazení:', sortBy);
-            
-            // Pokud už je aktivní, změň směr
-            if (this.classList.contains('active')) {
-                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
             } else {
-                // Odstranit aktivní třídu z ostatních
-                currentSort = sortBy;
-                currentSortDirection = 'desc';
+                if (player[currentKit] !== selectedTier) return false;
             }
-            
-            // Aktualizovat aktivní tlačítko
-            setActiveSortButton(currentSort, currentSortDirection);
-            
-            // Seřadit a překreslit
-            sortPlayers();
-            renderPlayersTable();
+        }
+        return true;
+    });
+    sortPlayers();
+}
+
+function sortPlayers() {
+    filteredPlayers.sort((a, b) => {
+        let valA, valB;
+        if (currentSort === 'name') {
+            valA = a.name.toLowerCase();
+            valB = b.name.toLowerCase();
+        } else {
+            valA = a.totalPoints;
+            valB = b.totalPoints;
+        }
+        return currentSortDir === 'asc' ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+    });
+}
+
+function getKitValue(player, kitId) {
+    if (kitId === 'overall') return player.totalPoints;
+    return player[kitId] || '-';
+}
+
+function renderTable() {
+    const tbody = document.getElementById('tableBody');
+    const kitHeader = document.getElementById('kitHeader');
+    const tableTitle = document.getElementById('tableTitle');
+    
+    if (currentKit === 'overall') {
+        kitHeader.textContent = 'Best Kit';
+        tableTitle.innerHTML = '<i class="fas fa-chart-line"></i> Overall Rankings';
+    } else {
+        const kit = KITS.find(k => k.id === currentKit);
+        kitHeader.textContent = kit.name;
+        tableTitle.innerHTML = `<i class="fas fa-gamepad"></i> ${kit.name} Rankings`;
+    }
+    
+    if (filteredPlayers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="loading-cell">No players found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = filteredPlayers.map((player, idx) => {
+        let kitDisplay = '';
+        if (currentKit === 'overall') {
+            const bestKit = KITS.reduce((best, kit) => {
+                const tier = player[kit.id];
+                if (tier && POINTS_SYSTEM[tier] && (!best.tier || POINTS_SYSTEM[tier] > POINTS_SYSTEM[best.tier])) {
+                    return { tier, name: kit.display };
+                }
+                return best;
+            }, { tier: null, name: '-' });
+            kitDisplay = `<span class="tier-badge tier-${bestKit.tier || 'LT5'}">${bestKit.tier || '-'}</span>`;
+        } else {
+            const tier = player[currentKit] || '-';
+            kitDisplay = `<span class="tier-badge tier-${tier}">${tier}</span>`;
+        }
+        
+        return `
+            <tr onclick="showPlayerProfile('${player.name}')">
+                <td class="rank-cell">#${idx + 1}</td>
+                <td class="player-cell">
+                    <div class="player-info">
+                        <img class="player-avatar" src="https://mc-heads.net/avatar/${player.name}/44" 
+                             onerror="this.src='https://mc-heads.net/avatar/Steve/44'">
+                        <span class="player-name">${player.name}</span>
+                    </div>
+                </td>
+                <td><span class="title-badge" style="background: ${player.title.color}; color: ${player.title.name.includes('Novice') || player.title.name.includes('Cadet') ? '#0a0c15' : 'white'}">${player.title.name}</span></td>
+                <td class="points-cell">${player.totalPoints}</td>
+                <td>${kitDisplay}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function updateStats() {
+    document.getElementById('totalPlayers').textContent = filteredPlayers.length;
+    if (filteredPlayers.length > 0) {
+        document.getElementById('topPlayerName').textContent = filteredPlayers[0].name;
+        const total = filteredPlayers.reduce((s, p) => s + p.totalPoints, 0);
+        document.getElementById('avgPoints').textContent = Math.round(total / filteredPlayers.length);
+        
+        let highestTier = 'N/A';
+        let highestPoints = -1;
+        players.forEach(p => {
+            KITS.forEach(kit => {
+                const tier = p[kit.id];
+                if (tier && POINTS_SYSTEM[tier] && POINTS_SYSTEM[tier] > highestPoints) {
+                    highestPoints = POINTS_SYSTEM[tier];
+                    highestTier = tier;
+                }
+            });
+        });
+        document.getElementById('highestTier').textContent = highestTier;
+    } else {
+        document.getElementById('topPlayerName').textContent = '-';
+        document.getElementById('avgPoints').textContent = '0';
+        document.getElementById('highestTier').textContent = '-';
+    }
+}
+
+function renderNavTabs() {
+    const container = document.getElementById('kitTabs');
+    container.innerHTML = `
+        <button class="nav-tab ${currentKit === 'overall' ? 'active' : ''}" data-kit="overall">🏆 Overall</button>
+        ${KITS.map(kit => `<button class="nav-tab ${currentKit === kit.id ? 'active' : ''}" data-kit="${kit.id}">${kit.name}</button>`).join('')}
+    `;
+    document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentKit = btn.dataset.kit;
+            renderNavTabs();
+            filterPlayers();
+            renderTable();
+            updateStats();
+        });
+    });
+}
+
+function renderInfoPanels() {
+    const pointsContainer = document.getElementById('pointsList');
+    pointsContainer.innerHTML = Object.entries(POINTS_SYSTEM).map(([tier, pts]) => `
+        <div class="points-item"><span class="tier-badge tier-${tier}" style="width: auto; padding: 4px 12px;">${tier}</span><span>${pts} pts</span></div>
+    `).join('');
+    
+    const titlesContainer = document.getElementById('titlesList');
+    titlesContainer.innerHTML = TITLES.map(title => `
+        <div class="title-item"><span class="title-name">${title.name}</span><span class="title-range">${title.min} - ${title.max === Infinity ? '+' : title.max} pts</span></div>
+    `).join('');
+    
+    const kitsContainer = document.getElementById('kitsList');
+    kitsContainer.innerHTML = KITS.map(kit => `
+        <div class="kit-item"><span>${kit.name}</span><span>Ranked PvP</span></div>
+    `).join('');
+}
+
+function showPlayerProfile(playerName) {
+    const player = players.find(p => p.name === playerName);
+    if (!player) return;
+    
+    const modal = document.getElementById('playerModal');
+    const modalBody = document.getElementById('modalBody');
+    
+    modalBody.innerHTML = `
+        <div class="profile-header">
+            <img class="profile-avatar" src="https://mc-heads.net/avatar/${player.name}/100" onerror="this.src='https://mc-heads.net/avatar/Steve/100'">
+            <div class="profile-info">
+                <h2>${player.name}</h2>
+                <div class="profile-title" style="background: ${player.title.color}; color: ${player.title.name.includes('Novice') || player.title.name.includes('Cadet') ? '#0a0c15' : 'white'}">${player.title.name}</div>
+                <div class="profile-points">${player.totalPoints} Points</div>
+            </div>
+        </div>
+        <div class="kits-grid">
+            ${KITS.map(kit => `
+                <div class="kit-card">
+                    <div class="kit-name">${kit.name}</div>
+                    <div class="kit-tier tier-badge tier-${player[kit.id] || 'LT5'}">${player[kit.id] || '-'}</div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    const modal = document.getElementById('playerModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function setupEventListeners() {
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        searchTerm = e.target.value;
+        filterPlayers();
+        renderTable();
+        updateStats();
+    });
+    
+    document.getElementById('tierFilter').addEventListener('change', (e) => {
+        selectedTier = e.target.value;
+        filterPlayers();
+        renderTable();
+        updateStats();
+    });
+    
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        searchTerm = '';
+        selectedTier = 'all';
+        document.getElementById('searchInput').value = '';
+        document.getElementById('tierFilter').value = 'all';
+        filterPlayers();
+        renderTable();
+        updateStats();
+    });
+    
+    document.querySelectorAll('.sort-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const sort = btn.dataset.sort;
+            if (currentSort === sort) {
+                currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort = sort;
+                currentSortDir = 'desc';
+            }
+            document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterPlayers();
+            renderTable();
+            updateStats();
         });
     });
     
-    // Info panel toggle
-    infoToggle.addEventListener('click', function() {
-        infoContent.classList.toggle('show');
-        const icon = this.querySelector('.fa-chevron-down');
-        icon.classList.toggle('fa-rotate-180');
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+    document.getElementById('playerModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('playerModal')) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
     });
     
-    // Kopírování IP adresy
-    copyIpBtn.addEventListener('click', function() {
-        const ip = 'mc.minekap.eu';
-        navigator.clipboard.writeText(ip).then(() => {
-            const originalIcon = this.innerHTML;
-            this.innerHTML = '<i class="fas fa-check"></i>';
-            setTimeout(() => {
-                this.innerHTML = originalIcon;
-            }, 2000);
-        });
+    // Cursor glow effect
+    document.addEventListener('mousemove', (e) => {
+        const glow = document.querySelector('.cursor-glow');
+        if (glow) glow.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
     });
-    
-    // Modal události
-    modalCloseBtn.addEventListener('click', closePlayerModal);
-    
-    // Zavření modalu kliknutím mimo obsah
-    playerModalOverlay.addEventListener('click', function(e) {
-        if (e.target === playerModalOverlay) {
-            closePlayerModal();
-        }
-    });
-    
-    // Zavření modalu klávesou ESC
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && playerModalOverlay.classList.contains('active')) {
-            closePlayerModal();
-        }
-    });
-    
-    // Události pro filtry
-    playerSearch.addEventListener('input', filterPlayers);
-    kitFilter.addEventListener('change', filterPlayers);
-    tierFilter.addEventListener('change', filterPlayers);
-    resetFiltersBtn.addEventListener('click', resetFilters);
-    
-    // Načtení dat při startu
-    console.log('Spouštím aplikaci...');
-    loadPlayersData();
-});
+}
+
+function init() {
+    initPlayers();
+    renderNavTabs();
+    renderInfoPanels();
+    filterPlayers();
+    renderTable();
+    updateStats();
+    setupEventListeners();
+}
+
+document.addEventListener('DOMContentLoaded', init);
