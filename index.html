@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Minecraft PvP Tier List for Minecraft Combat Gamemodes">
-    <meta name="theme-color" content="#0a0c15">
     <title>Minekap PvP Tier List | Combat Rankings</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,8 +10,9 @@
 </head>
 <body>
 
+<!-- Background efekty -->
 <div class="cursor-glow"></div>
-<div class="bg-particles" id="particles"></div>
+<div class="bg-particles"></div>
 
 <header class="header">
     <div class="container">
@@ -35,14 +34,14 @@
 
 <main>
     <div class="container">
-        <!-- Kit Navigation -->
+        <!-- Navigační taby (kity) -->
         <div class="nav-wrapper">
             <div class="nav-tabs" id="kitTabs"></div>
             <div class="nav-indicator"></div>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="stats-grid" id="statsGrid">
+        <!-- Statistiky -->
+        <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon"><i class="fas fa-users"></i></div>
                 <div class="stat-info">
@@ -73,7 +72,7 @@
             </div>
         </div>
 
-        <!-- Search & Filter Bar -->
+        <!-- Vyhledávání a filtrování -->
         <div class="control-bar">
             <div class="search-box">
                 <i class="fas fa-search"></i>
@@ -100,19 +99,19 @@
             </button>
         </div>
 
-        <!-- Players Table -->
+        <!-- Tabulka hráčů -->
         <div class="table-wrapper">
             <div class="table-header">
                 <div class="sort-group">
                     <button class="sort-btn active" data-sort="points">
-                        <i class="fas fa-chart-line"></i> Points
+                        <i class="fas fa-chart-line"></i> By Points
                     </button>
                     <button class="sort-btn" data-sort="name">
-                        <i class="fas fa-sort-alpha-down"></i> Name
+                        <i class="fas fa-sort-alpha-down"></i> By Name
                     </button>
                 </div>
                 <div class="table-title">
-                    <h2 id="tableTitle">Overall Rankings</h2>
+                    <h2 id="tableTitle"><i class="fas fa-trophy"></i> Overall Rankings</h2>
                 </div>
             </div>
             <div class="table-container">
@@ -123,7 +122,7 @@
                             <th>Player</th>
                             <th>Title</th>
                             <th>Points</th>
-                            <th id="kitHeader">Kit</th>
+                            <th id="kitHeader">Best Kit</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -133,7 +132,7 @@
             </div>
         </div>
 
-        <!-- Info Panels -->
+        <!-- Info panely (bodový systém, title systém, gamemody) -->
         <div class="info-grid">
             <div class="info-card">
                 <div class="info-card-header">
@@ -162,11 +161,11 @@
 
 <footer class="footer">
     <div class="container">
-        <p>© 2026 PvP Tier List | All rankings based on competitive performance</p>
+        <p>PvP Tier List | All rankings based on competitive performance</p>
     </div>
 </footer>
 
-<!-- Player Modal -->
+<!-- Modal pro detail hráče -->
 <div class="modal" id="playerModal">
     <div class="modal-content">
         <button class="modal-close" id="closeModalBtn">
@@ -176,7 +175,8 @@
     </div>
 </div>
 
+<!-- Skripty (napojeno na sebe) -->
 <script src="js/data.js"></script>
-<script src="js/app.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
