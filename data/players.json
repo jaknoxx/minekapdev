@@ -32,14 +32,14 @@
     {
       "name": "citronyx1",
       "region": "EU",
-      "sword": "HT5",
-      "axe": "LT5",
-      "uhc": "",
+      "sword": "LT4",
+      "axe": "HT5",
+      "uhc": "LT5",
       "diapot": "",
-      "nethpot": "",
-      "smp": "",
+      "nethpot": "LT5",
+      "smp": "HT5",
       "crystal": "LT5",
-      "mace": "HT5",
+      "mace": "LT4",
       "spear": ""
     },
     {
