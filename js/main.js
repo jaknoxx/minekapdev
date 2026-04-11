@@ -5,15 +5,61 @@
 let allPlayers = [];
 let currentFilteredPlayers = [];
 
-// Inicializace hráčů
+// Inicializace hráčů (přidání bodů a titulů)
 function initPlayers() {
+    console.log('Inicializace hráčů...');
     allPlayers = PLAYERS_DATA.map(player => calculatePlayerStats({ ...player }));
+    // Seřazení podle bodů (nejlepší první)
     allPlayers.sort((a, b) => b.totalPoints - a.totalPoints);
+    console.log('Načteno hráčů:', allPlayers.length);
+    console.log('První hráč:', allPlayers[0]?.name, allPlayers[0]?.totalPoints, 'bodů');
+    return allPlayers;
+}
+
+// Filtrování hráčů
+function filterPlayers(players) {
+    let filtered = [...players];
+    
+    const searchTerm = document.getElementById('searchInput')?.value || '';
+    const selectedTier = document.getElementById('tierFilter')?.value || 'all';
+    
+    // Filtrování podle jména
+    if (searchTerm) {
+        filtered = filtered.filter(player => 
+            player.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }
+    
+    // Filtrování podle tieru
+    if (selectedTier !== 'all') {
+        filtered = filtered.filter(player => {
+            if (currentKit === 'overall') {
+                // Pro overall: hráč musí mít alespoň jeden kit s vybraným tierem
+                return GAMEMODES.some(gamemode => player[gamemode.id] === selectedTier);
+            } else {
+                // Pro konkrétní kit: hráč musí mít v tom kitu vybraný tier
+                return player[currentKit] === selectedTier;
+            }
+        });
+    }
+    
+    return filtered;
+}
+
+// Aplikace filtrů a vykreslení
+function applyFiltersAndRender() {
+    const filtered = filterPlayers(allPlayers);
+    const sorted = sortPlayersByKit(filtered, currentKit);
+    renderTable(sorted);
+    updateStatsDisplay(sorted);
+    return sorted;
 }
 
 // Vytvoření navigačních tabů
 function renderNavTabs() {
     const container = document.getElementById('kitTabs');
+    if (!container) return;
+    
     container.innerHTML = `
         <button class="nav-tab ${currentKit === 'overall' ? 'active' : ''}" data-kit="overall">
             <i class="fas fa-trophy"></i> Overall
@@ -30,35 +76,42 @@ function renderNavTabs() {
             currentKit = btn.dataset.kit;
             renderNavTabs();
             setActiveSortButton();
-            currentFilteredPlayers = applyFiltersAndSort(allPlayers);
+            applyFiltersAndRender();
         });
     });
 }
 
+// Reset všech filtrů
+function resetFilters() {
+    const searchInput = document.getElementById('searchInput');
+    const tierFilter = document.getElementById('tierFilter');
+    
+    if (searchInput) searchInput.value = '';
+    if (tierFilter) tierFilter.value = 'all';
+    
+    applyFiltersAndRender();
+}
+
 // Nastavení event listenerů
 function setupEventListeners() {
-    // Vyhledávání
     const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', (e) => {
-        searchTerm = e.target.value;
-        currentFilteredPlayers = applyFiltersAndSort(allPlayers);
-    });
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            applyFiltersAndRender();
+        });
+    }
     
-    // Tier filtr
     const tierFilter = document.getElementById('tierFilter');
-    tierFilter.addEventListener('change', (e) => {
-        selectedTier = e.target.value;
-        currentFilteredPlayers = applyFiltersAndSort(allPlayers);
-    });
+    if (tierFilter) {
+        tierFilter.addEventListener('change', () => {
+            applyFiltersAndRender();
+        });
+    }
     
-    // Reset tlačítko
-    document.getElementById('resetBtn').addEventListener('click', () => {
-        searchTerm = '';
-        selectedTier = 'all';
-        searchInput.value = '';
-        tierFilter.value = 'all';
-        currentFilteredPlayers = applyFiltersAndSort(allPlayers);
-    });
+    const resetBtn = document.getElementById('resetBtn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', resetFilters);
+    }
     
     // Sort buttons
     document.querySelectorAll('.sort-btn').forEach(btn => {
@@ -71,7 +124,7 @@ function setupEventListeners() {
                 currentSortDir = 'desc';
             }
             setActiveSortButton();
-            currentFilteredPlayers = applyFiltersAndSort(allPlayers);
+            applyFiltersAndRender();
         });
     });
     
@@ -81,15 +134,18 @@ function setupEventListeners() {
 
 // Inicializace všeho
 function init() {
+    console.log('Spouštím PvP Tier List...');
     initPlayers();
     renderNavTabs();
     updateInfoPanels();
     setActiveSortButton();
-    currentFilteredPlayers = applyFiltersAndSort(allPlayers);
+    applyFiltersAndRender();
     setupEventListeners();
     
     // Uložení do window pro přístup z jiných skriptů
     window.allPlayers = allPlayers;
+    window.showPlayerProfile = showPlayerProfile;
+    console.log('Inicializace dokončena. Hráčů:', allPlayers.length);
 }
 
 // Spuštění po načtení DOM
