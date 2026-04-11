@@ -139,18 +139,12 @@
             </div>
             <div class="table-wrapper">
                 <table class="rankings-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Player</th>
-                            <th>Title</th>
-                            <th>Points</th>
-                            <th id="kitHeader">Best Kit</th>
-                        </tr>
+                    <thead id="tableHeader">
+                        <!-- Dynamicky se vygeneruje hlavicka podle kitu -->
                     </thead>
                     <tbody id="tableBody">
                         <tr>
-                            <td colspan="5" class="loading-state">
+                            <td colspan="20" class="loading-state">
                                 <div class="spinner"></div>
                                 <span>Loading players...</span>
                             </td>
