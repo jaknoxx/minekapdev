@@ -2,9 +2,10 @@
 // TABLE.JS - Logika tabulky (Overall x Kity)
 // ========================================
 
-let currentKit = 'overall';
-let currentSort = 'points';
-let currentSortDir = 'desc';
+// Tyto proměnné jsou definovány v main.js, ale pro jistotu je zkontrolujeme
+if (typeof currentKit === 'undefined') var currentKit = 'overall';
+if (typeof currentSort === 'undefined') var currentSort = 'points';
+if (typeof currentSortDir === 'undefined') var currentSortDir = 'desc';
 
 // Řazení podle tieru (pro jednotlivé kity)
 function getTierRank(tier) {
@@ -14,6 +15,8 @@ function getTierRank(tier) {
 
 // Řazení hráčů podle aktuálního kitu
 function sortPlayersByKit(players, kitId) {
+    if (!players || players.length === 0) return [];
+    
     return [...players].sort((a, b) => {
         if (currentSort === 'name') {
             const valA = a.name.toLowerCase();
@@ -38,6 +41,7 @@ function sortPlayersByKit(players, kitId) {
 // Vytvoření hlavičky tabulky podle aktuálního kitu
 function renderTableHeader() {
     const thead = document.getElementById('tableHeader');
+    if (!thead) return;
     
     if (currentKit === 'overall') {
         // Overall: zobraz všechny kity
@@ -70,17 +74,12 @@ function renderTable(players) {
     const tbody = document.getElementById('tableBody');
     const tableTitle = document.getElementById('tableTitle');
     
-    // Nastavení nadpisu
-    if (currentKit === 'overall') {
-        tableTitle.innerHTML = '<i class="fas fa-trophy"></i> Overall Rankings - All Kits';
-    } else {
-        const gamemode = GAMEMODES.find(g => g.id === currentKit);
-        tableTitle.innerHTML = `<i class="fas fa-gamepad"></i> ${gamemode?.name || currentKit} Rankings - Tier Only`;
+    if (!tbody) {
+        console.error('Tabulka nebyla nalezena!');
+        return;
     }
     
-    // Vygenerování hlavičky
-    renderTableHeader();
-    
+    // Kontrola, zda máme data
     if (!players || players.length === 0) {
         tbody.innerHTML = `
             <tr>
@@ -93,6 +92,19 @@ function renderTable(players) {
         return;
     }
     
+    // Nastavení nadpisu
+    if (tableTitle) {
+        if (currentKit === 'overall') {
+            tableTitle.innerHTML = '<i class="fas fa-trophy"></i> Overall Rankings - All Kits';
+        } else {
+            const gamemode = GAMEMODES.find(g => g.id === currentKit);
+            tableTitle.innerHTML = `<i class="fas fa-gamepad"></i> ${gamemode?.name || currentKit} Rankings - Tier Only`;
+        }
+    }
+    
+    // Vygenerování hlavičky
+    renderTableHeader();
+    
     // Seřazení hráčů podle aktuálního kitu
     const sortedPlayers = sortPlayersByKit(players, currentKit);
     
@@ -103,7 +115,7 @@ function renderTable(players) {
         if (currentKit === 'overall') {
             // OVERALL: zobraz všechny kity
             return `
-                <tr style="animation-delay: ${index * 0.02}s" onclick="showPlayerProfile('${player.name}')">
+                <tr style="animation-delay: ${index * 0.02}s" onclick="showPlayerProfile('${player.name.replace(/'/g, "\\'")}')">
                     <td class="rank-cell">#${index + 1}</td>
                     <td class="player-cell">
                         <div class="player-info">
@@ -130,7 +142,7 @@ function renderTable(players) {
             // KONKRÉTNÍ KIT: zobraz jen tier v daném kitu
             const tier = player[currentKit] || '-';
             return `
-                <tr style="animation-delay: ${index * 0.02}s" onclick="showPlayerProfile('${player.name}')">
+                <tr style="animation-delay: ${index * 0.02}s" onclick="showPlayerProfile('${player.name.replace(/'/g, "\\'")}')">
                     <td class="rank-cell">#${index + 1}</td>
                     <td class="player-cell">
                         <div class="player-info">
