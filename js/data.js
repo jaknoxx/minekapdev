@@ -35,7 +35,7 @@ const GAMEMODES = [
     { id: 'spear', name: '🏹 Spear', display: 'Spear', icon: 'fa-gun' }
 ];
 
-// Data hráčů
+// Data hráčů (PŘÍMO ZDE, aby se načetla hned)
 const PLAYERS_DATA = [
     { "name": "jaknox", "region": "EU", "sword": "LT3", "axe": "LT3", "uhc": "HT4", "diapot": "HT4", "nethpot": "HT4", "smp": "HT4", "crystal": "HT4", "mace": "LT4", "spear": "LT3" },
     { "name": "YT_lacjim168", "region": "EU", "sword": "LT3", "axe": "LT4", "uhc": "", "diapot": "LT5", "nethpot": "LT5", "smp": "", "crystal": "", "mace": "HT5", "spear": "HT5" },
@@ -46,6 +46,7 @@ const PLAYERS_DATA = [
     { "name": "ItzLunas", "region": "EU", "sword": "LT4", "axe": "", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "LT4", "mace": "", "spear": "" },
     { "name": "Vojtas_", "region": "EU", "sword": "HT4", "axe": "", "uhc": "HT5", "diapot": "", "nethpot": "", "smp": "HT5", "crystal": "", "mace": "HT5", "spear": "" },
     { "name": "vlk_1", "region": "EU", "sword": "LT5", "axe": "", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "", "mace": "", "spear": "" },
+    { "name": "itz_bronikk", "region": "EU", "sword": "LT3", "axe": "", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "", "mace": "", "spear": "" },
     { "name": "doge_cg", "region": "EU", "sword": "", "axe": "LT4", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "", "mace": "", "spear": "" },
     { "name": "Terry885522", "region": "EU", "sword": "LT5", "axe": "", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "", "mace": "", "spear": "LT5" }
 ];
