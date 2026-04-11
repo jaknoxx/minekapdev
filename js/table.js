@@ -1,31 +1,90 @@
 // ========================================
-// TABLE.JS - Logika tabulky
+// TABLE.JS - Logika tabulky (Overall x Kity)
 // ========================================
 
 let currentKit = 'overall';
 let currentSort = 'points';
 let currentSortDir = 'desc';
 
+// Řazení podle tieru (pro jednotlivé kity)
+function getTierRank(tier) {
+    const tierOrder = ['HT1', 'LT1', 'HT2', 'LT2', 'HT3', 'LT3', 'HT4', 'LT4', 'HT5', 'LT5', ''];
+    return tierOrder.indexOf(tier);
+}
+
+// Řazení hráčů podle aktuálního kitu
+function sortPlayersByKit(players, kitId) {
+    return [...players].sort((a, b) => {
+        if (currentSort === 'name') {
+            const valA = a.name.toLowerCase();
+            const valB = b.name.toLowerCase();
+            return currentSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        } else if (currentSort === 'points') {
+            // Pro overall řazení podle celkových bodů
+            if (kitId === 'overall') {
+                return currentSortDir === 'asc' ? a.totalPoints - b.totalPoints : b.totalPoints - a.totalPoints;
+            }
+            // Pro konkrétní kit řazení podle tieru (HT1 nejlepší)
+            const tierA = a[kitId] || '';
+            const tierB = b[kitId] || '';
+            const rankA = getTierRank(tierA);
+            const rankB = getTierRank(tierB);
+            return currentSortDir === 'asc' ? rankA - rankB : rankB - rankA;
+        }
+        return 0;
+    });
+}
+
+// Vytvoření hlavičky tabulky podle aktuálního kitu
+function renderTableHeader() {
+    const thead = document.getElementById('tableHeader');
+    
+    if (currentKit === 'overall') {
+        // Overall: zobraz všechny kity
+        thead.innerHTML = `
+            <tr>
+                <th>#</th>
+                <th>Player</th>
+                <th>Title</th>
+                <th>Points</th>
+                ${GAMEMODES.map(gm => `<th class="kit-column">${gm.name}</th>`).join('')}
+            </tr>
+        `;
+    } else {
+        // Konkrétní kit: zobraz jen jeden sloupec pro tier
+        const selectedGamemode = GAMEMODES.find(g => g.id === currentKit);
+        thead.innerHTML = `
+            <tr>
+                <th>#</th>
+                <th>Player</th>
+                <th>Title</th>
+                <th>Points</th>
+                <th class="kit-column">${selectedGamemode?.name || currentKit} Tier</th>
+            </tr>
+        `;
+    }
+}
+
 // Vykreslení tabulky
 function renderTable(players) {
     const tbody = document.getElementById('tableBody');
-    const kitHeader = document.getElementById('kitHeader');
     const tableTitle = document.getElementById('tableTitle');
     
-    // Nastavení nadpisů podle aktuálního kitu
+    // Nastavení nadpisu
     if (currentKit === 'overall') {
-        kitHeader.innerHTML = '<i class="fas fa-star"></i> Best Kit';
-        tableTitle.innerHTML = '<i class="fas fa-trophy"></i> Overall Rankings';
+        tableTitle.innerHTML = '<i class="fas fa-trophy"></i> Overall Rankings - All Kits';
     } else {
         const gamemode = GAMEMODES.find(g => g.id === currentKit);
-        kitHeader.innerHTML = `<i class="fas ${gamemode.icon || 'fa-gamepad'}"></i> ${gamemode.name} Tier`;
-        tableTitle.innerHTML = `<i class="fas fa-gamepad"></i> ${gamemode.name} Rankings`;
+        tableTitle.innerHTML = `<i class="fas fa-gamepad"></i> ${gamemode?.name || currentKit} Rankings - Tier Only`;
     }
+    
+    // Vygenerování hlavičky
+    renderTableHeader();
     
     if (!players || players.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="5" class="loading-state">
+                <td colspan="20" class="loading-state">
                     <i class="fas fa-search" style="font-size: 32px; margin-bottom: 12px; opacity: 0.5;"></i>
                     <span>No players found</span>
                 </td>
@@ -34,59 +93,65 @@ function renderTable(players) {
         return;
     }
     
-    tbody.innerHTML = players.map((player, index) => {
-        let kitDisplay = '';
-        
-        if (currentKit === 'overall') {
-            const bestKit = getBestKit(player);
-            kitDisplay = `<span class="tier-badge tier-${bestKit.tier || 'LT5'}">${bestKit.tier || '-'}</span>`;
-        } else {
-            const tier = player[currentKit] || '-';
-            kitDisplay = `<span class="tier-badge tier-${tier}">${tier}</span>`;
-        }
-        
+    // Seřazení hráčů podle aktuálního kitu
+    const sortedPlayers = sortPlayersByKit(players, currentKit);
+    
+    tbody.innerHTML = sortedPlayers.map((player, index) => {
         const titleColor = player.title.color;
         const titleTextColor = player.title.textColor || (player.title.name.includes('Novice') || player.title.name.includes('Cadet') ? '#0a0c15' : 'white');
         
-        return `
-            <tr style="animation-delay: ${index * 0.02}s" onclick="showPlayerProfile('${player.name}')">
-                <td class="rank-cell">#${index + 1}</td>
-                <td class="player-cell">
-                    <div class="player-info">
-                        <img class="player-avatar" 
-                             src="https://mc-heads.net/avatar/${encodeURIComponent(player.name)}/44" 
-                             alt="${player.name}"
-                             onerror="this.src='https://mc-heads.net/avatar/Steve/44'">
-                        <span class="player-name">${escapeHtml(player.name)}</span>
-                    </div>
-                </td>
-                <td>
-                    <span class="title-badge" style="background: ${titleColor}; color: ${titleTextColor}">
-                        ${player.title.name}
-                    </span>
-                </td>
-                <td class="points-cell">${player.totalPoints}</td>
-                <td>${kitDisplay}</td>
-            </tr>
-        `;
-    }).join('');
-}
-
-// Řazení hráčů
-function sortPlayers(players) {
-    return [...players].sort((a, b) => {
-        let valA, valB;
-        
-        if (currentSort === 'name') {
-            valA = a.name.toLowerCase();
-            valB = b.name.toLowerCase();
-            return currentSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        if (currentKit === 'overall') {
+            // OVERALL: zobraz všechny kity
+            return `
+                <tr style="animation-delay: ${index * 0.02}s" onclick="showPlayerProfile('${player.name}')">
+                    <td class="rank-cell">#${index + 1}</td>
+                    <td class="player-cell">
+                        <div class="player-info">
+                            <img class="player-avatar" 
+                                 src="https://mc-heads.net/avatar/${encodeURIComponent(player.name)}/44" 
+                                 alt="${player.name}"
+                                 onerror="this.src='https://mc-heads.net/avatar/Steve/44'">
+                            <span class="player-name">${escapeHtml(player.name)}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="title-badge" style="background: ${titleColor}; color: ${titleTextColor}">
+                            ${player.title.name}
+                        </span>
+                    </td>
+                    <td class="points-cell">${player.totalPoints}</td>
+                    ${GAMEMODES.map(gm => {
+                        const tier = player[gm.id] || '-';
+                        return `<td class="kit-tier-cell"><span class="tier-badge tier-${tier === '-' ? 'empty' : tier}">${tier}</span></td>`;
+                    }).join('')}
+                </tr>
+            `;
         } else {
-            valA = a.totalPoints;
-            valB = b.totalPoints;
-            return currentSortDir === 'asc' ? valA - valB : valB - valA;
+            // KONKRÉTNÍ KIT: zobraz jen tier v daném kitu
+            const tier = player[currentKit] || '-';
+            return `
+                <tr style="animation-delay: ${index * 0.02}s" onclick="showPlayerProfile('${player.name}')">
+                    <td class="rank-cell">#${index + 1}</td>
+                    <td class="player-cell">
+                        <div class="player-info">
+                            <img class="player-avatar" 
+                                 src="https://mc-heads.net/avatar/${encodeURIComponent(player.name)}/44" 
+                                 alt="${player.name}"
+                                 onerror="this.src='https://mc-heads.net/avatar/Steve/44'">
+                            <span class="player-name">${escapeHtml(player.name)}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="title-badge" style="background: ${titleColor}; color: ${titleTextColor}">
+                            ${player.title.name}
+                        </span>
+                    </td>
+                    <td class="points-cell">${player.totalPoints}</td>
+                    <td class="kit-tier-cell"><span class="tier-badge tier-${tier === '-' ? 'empty' : tier}">${tier}</span></td>
+                </tr>
+            `;
         }
-    });
+    }).join('');
 }
 
 // Nastavení aktivního tlačítka řazení
