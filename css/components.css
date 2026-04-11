@@ -297,6 +297,7 @@
 .rankings-table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 800px;
 }
 
 .rankings-table th {
@@ -308,6 +309,12 @@
     text-transform: uppercase;
     letter-spacing: 1px;
     border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.rankings-table th.kit-column {
+    text-align: center;
+    min-width: 80px;
 }
 
 .rankings-table td {
@@ -335,7 +342,7 @@
 }
 
 .player-cell {
-    min-width: 200px;
+    min-width: 180px;
 }
 
 .player-info {
@@ -378,6 +385,8 @@
     font-size: 18px;
     font-family: 'JetBrains Mono', monospace;
     color: #00d4ff;
+    text-align: center;
+    width: 80px;
 }
 
 .tier-badge {
@@ -391,6 +400,11 @@
     font-family: 'JetBrains Mono', monospace;
 }
 
+/* Kit tier v tabulce - centrování */
+.kit-tier-cell {
+    text-align: center;
+}
+
 /* Tier Colors */
 .tier-HT1 { background: var(--tier-ht1); color: white; box-shadow: 0 0 10px rgba(255,42,42,0.3); }
 .tier-LT1 { background: var(--tier-lt1); color: white; }
@@ -402,6 +416,7 @@
 .tier-LT4 { background: var(--tier-lt4); color: white; }
 .tier-HT5 { background: var(--tier-ht5); color: white; }
 .tier-LT5 { background: var(--tier-lt5); color: white; }
+.tier-empty { background: var(--bg-tertiary); color: var(--text-muted); }
 
 .loading-state {
     text-align: center;
@@ -685,6 +700,14 @@
     .info-grid {
         grid-template-columns: 1fr;
     }
+    
+    .rankings-table th, .rankings-table td {
+        padding: 10px 8px;
+    }
+    
+    .kit-column {
+        min-width: 60px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -699,5 +722,19 @@
     
     .points-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .rank-cell {
+        width: 40px;
+    }
+    
+    .player-name {
+        font-size: 13px;
+    }
+    
+    .tier-badge {
+        padding: 4px 8px;
+        font-size: 10px;
+        min-width: 50px;
     }
 }
