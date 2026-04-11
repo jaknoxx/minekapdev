@@ -37,7 +37,7 @@ const GAMEMODES = [
 
 // Data hráčů (PŘÍMO ZDE, aby se načetla hned)
 const PLAYERS_DATA = [
-    { "name": "jaknox", "region": "EU", "sword": "LT3", "axe": "LT3", "uhc": "HT4", "diapot": "HT4", "nethpot": "HT4", "smp": "HT4", "crystal": "HT4", "mace": "LT4", "spear": "LT3" },
+    { "name": "jaknox", "region": "EU", "sword": "LT3", "axe": "LT3", "uhc": "HT4", "diapot": "HT4", "nethpot": "HT4", "smp": "LT3", "crystal": "HT4", "mace": "LT4", "spear": "LT3" },
     { "name": "YT_lacjim168", "region": "EU", "sword": "LT3", "axe": "LT4", "uhc": "", "diapot": "LT5", "nethpot": "LT5", "smp": "", "crystal": "", "mace": "HT5", "spear": "HT5" },
     { "name": "citronyx1", "region": "EU", "sword": "HT5", "axe": "LT5", "uhc": "", "diapot": "", "nethpot": "", "smp": "", "crystal": "LT5", "mace": "HT5", "spear": "" },
     { "name": "Jirkafogus", "region": "EU", "sword": "HT4", "axe": "HT4", "uhc": "LT3", "diapot": "HT4", "nethpot": "", "smp": "LT3", "crystal": "HT5", "mace": "", "spear": "LT3" },
