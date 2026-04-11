@@ -3,12 +3,17 @@
 // ========================================
 
 // Zobrazení profilu hráče
-window.showPlayerProfile = function(playerName) {
+function showPlayerProfile(playerName) {
     const player = window.allPlayers?.find(p => p.name === playerName);
-    if (!player) return;
+    if (!player) {
+        console.error('Hráč nenalezen:', playerName);
+        return;
+    }
     
     const modal = document.getElementById('playerModal');
     const modalBody = document.getElementById('modalBody');
+    
+    if (!modal || !modalBody) return;
     
     const titleColor = player.title.color;
     const titleTextColor = player.title.textColor || (player.title.name.includes('Novice') || player.title.name.includes('Cadet') ? '#0a0c15' : 'white');
@@ -33,7 +38,7 @@ window.showPlayerProfile = function(playerName) {
                 ${GAMEMODES.map(gamemode => `
                     <div class="kit-card">
                         <div class="kit-name">${gamemode.name}</div>
-                        <div class="kit-tier tier-badge tier-${player[gamemode.id] || 'LT5'}">
+                        <div class="kit-tier tier-badge tier-${player[gamemode.id] || 'empty'}">
                             ${player[gamemode.id] || '-'}
                         </div>
                     </div>
@@ -49,16 +54,27 @@ window.showPlayerProfile = function(playerName) {
 // Zavření modalu
 function closeModal() {
     const modal = document.getElementById('playerModal');
-    modal.classList.remove('active');
-    document.body.style.overflow = '';
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
 }
 
 // Nastavení event listenerů pro modal
 function setupModalEvents() {
-    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
-    document.getElementById('playerModal').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('playerModal')) closeModal();
-    });
+    const closeBtn = document.getElementById('closeModalBtn');
+    const modal = document.getElementById('playerModal');
+    
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeModal);
+    }
+    
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+    }
+    
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeModal();
     });
