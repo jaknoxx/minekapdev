@@ -73,7 +73,19 @@ function renderNavTabs() {
     
     document.querySelectorAll('.nav-tab').forEach(btn => {
         btn.addEventListener('click', () => {
-            currentKit = btn.dataset.kit;
+            const newKit = btn.dataset.kit;
+            currentKit = newKit;
+            
+            // Při přepnutí na kit (ne overall) nastavíme řazení na 'points' a směr 'asc' (od nejlepšího)
+            if (currentKit !== 'overall') {
+                currentSort = 'points';
+                currentSortDir = 'asc';
+            } else {
+                // Při přepnutí na overall zachováme řazení podle bodů sestupně
+                currentSort = 'points';
+                currentSortDir = 'desc';
+            }
+            
             renderNavTabs();
             setActiveSortButton();
             applyFiltersAndRender();
@@ -88,6 +100,16 @@ function resetFilters() {
     
     if (searchInput) searchInput.value = '';
     if (tierFilter) tierFilter.value = 'all';
+    
+    // Reset řazení podle aktuálního kitu
+    if (currentKit === 'overall') {
+        currentSort = 'points';
+        currentSortDir = 'desc';
+    } else {
+        currentSort = 'points';
+        currentSortDir = 'asc';
+    }
+    setActiveSortButton();
     
     applyFiltersAndRender();
 }
@@ -121,7 +143,16 @@ function setupEventListeners() {
                 currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
             } else {
                 currentSort = sort;
-                currentSortDir = 'desc';
+                // Při řazení podle jména nastavíme asc, při řazení podle bodů podle aktuálního kitu
+                if (sort === 'name') {
+                    currentSortDir = 'asc';
+                } else if (sort === 'points') {
+                    if (currentKit === 'overall') {
+                        currentSortDir = 'desc';
+                    } else {
+                        currentSortDir = 'asc';
+                    }
+                }
             }
             setActiveSortButton();
             applyFiltersAndRender();
