@@ -7,10 +7,12 @@ if (typeof currentKit === 'undefined') var currentKit = 'overall';
 if (typeof currentSort === 'undefined') var currentSort = 'points';
 if (typeof currentSortDir === 'undefined') var currentSortDir = 'desc';
 
-// Řazení podle tieru (pro jednotlivé kity)
+// Řazení podle tieru (pro jednotlivé kity) - čím menší číslo, tím lepší tier
 function getTierRank(tier) {
     const tierOrder = ['HT1', 'LT1', 'HT2', 'LT2', 'HT3', 'LT3', 'HT4', 'LT4', 'HT5', 'LT5', ''];
-    return tierOrder.indexOf(tier);
+    const index = tierOrder.indexOf(tier);
+    // Pokud tier není v seznamu, dáme mu vysokou hodnotu (bude na konci)
+    return index === -1 ? 999 : index;
 }
 
 // Řazení hráčů podle aktuálního kitu
@@ -27,12 +29,19 @@ function sortPlayersByKit(players, kitId) {
             if (kitId === 'overall') {
                 return currentSortDir === 'asc' ? a.totalPoints - b.totalPoints : b.totalPoints - a.totalPoints;
             }
-            // Pro konkrétní kit řazení podle tieru (HT1 nejlepší)
+            // Pro konkrétní kit řazení podle tieru (HT1 nejlepší = nejmenší rank)
             const tierA = a[kitId] || '';
             const tierB = b[kitId] || '';
             const rankA = getTierRank(tierA);
             const rankB = getTierRank(tierB);
-            return currentSortDir === 'asc' ? rankA - rankB : rankB - rankA;
+            
+            // STANDARDNĚ: řazení od nejlepšího (nejmenší rank) po nejhorší (největší rank)
+            // To znamená asc (vzestupně) = od HT1 dolů
+            if (currentSortDir === 'asc') {
+                return rankA - rankB;
+            } else {
+                return rankB - rankA;
+            }
         }
         return 0;
     });
@@ -175,4 +184,12 @@ function setActiveSortButton() {
             btn.classList.add('active');
         }
     });
+}
+
+// Vynucení řazení od nejlepšího pro kity (při přepnutí)
+function forceBestToWorstSort() {
+    if (currentKit !== 'overall') {
+        currentSortDir = 'asc';
+        setActiveSortButton();
+    }
 }
