@@ -2,17 +2,19 @@
 // TABLE.JS - Logika tabulky (Overall x Kity)
 // ========================================
 
-// Tyto proměnné jsou definovány v main.js, ale pro jistotu je zkontrolujeme
+// Tyto proměnné jsou definovány v main.js
 if (typeof currentKit === 'undefined') var currentKit = 'overall';
 if (typeof currentSort === 'undefined') var currentSort = 'points';
 if (typeof currentSortDir === 'undefined') var currentSortDir = 'desc';
 
-// Řazení podle tieru (pro jednotlivé kity) - čím menší číslo, tím lepší tier
+// Řazení podle tieru - čím VYŠŠÍ číslo, tím LEPŠÍ tier (HT1 = 9, LT5 = 0)
 function getTierRank(tier) {
+    // Pořadí od NEJLEPŠÍHO (nahoře) po NEJHORŠÍ (dole)
     const tierOrder = ['HT1', 'LT1', 'HT2', 'LT2', 'HT3', 'LT3', 'HT4', 'LT4', 'HT5', 'LT5', ''];
     const index = tierOrder.indexOf(tier);
-    // Pokud tier není v seznamu, dáme mu vysokou hodnotu (bude na konci)
-    return index === -1 ? 999 : index;
+    // Obrátíme pořadí - HT1 má nejvyšší hodnotu (9), LT5 má nejnižší (0)
+    if (index === -1) return -1;
+    return tierOrder.length - 1 - index;
 }
 
 // Řazení hráčů podle aktuálního kitu
@@ -29,19 +31,14 @@ function sortPlayersByKit(players, kitId) {
             if (kitId === 'overall') {
                 return currentSortDir === 'asc' ? a.totalPoints - b.totalPoints : b.totalPoints - a.totalPoints;
             }
-            // Pro konkrétní kit řazení podle tieru (HT1 nejlepší = nejmenší rank)
+            // Pro konkrétní kit řazení podle tieru
             const tierA = a[kitId] || '';
             const tierB = b[kitId] || '';
             const rankA = getTierRank(tierA);
             const rankB = getTierRank(tierB);
             
-            // STANDARDNĚ: řazení od nejlepšího (nejmenší rank) po nejhorší (největší rank)
-            // To znamená asc (vzestupně) = od HT1 dolů
-            if (currentSortDir === 'asc') {
-                return rankA - rankB;
-            } else {
-                return rankB - rankA;
-            }
+            // Řazení DESC (sestupně) = od nejvyšší hodnoty (HT1) dolů
+            return rankB - rankA;
         }
         return 0;
     });
@@ -53,7 +50,6 @@ function renderTableHeader() {
     if (!thead) return;
     
     if (currentKit === 'overall') {
-        // Overall: zobraz všechny kity
         thead.innerHTML = `
             <tr>
                 <th>#</th>
@@ -64,7 +60,6 @@ function renderTableHeader() {
             </tr>
         `;
     } else {
-        // Konkrétní kit: zobraz jen jeden sloupec pro tier
         const selectedGamemode = GAMEMODES.find(g => g.id === currentKit);
         thead.innerHTML = `
             <tr>
@@ -88,7 +83,6 @@ function renderTable(players) {
         return;
     }
     
-    // Kontrola, zda máme data
     if (!players || players.length === 0) {
         tbody.innerHTML = `
             <tr>
@@ -101,20 +95,18 @@ function renderTable(players) {
         return;
     }
     
-    // Nastavení nadpisu
     if (tableTitle) {
         if (currentKit === 'overall') {
             tableTitle.innerHTML = '<i class="fas fa-trophy"></i> Overall Rankings - All Kits';
         } else {
             const gamemode = GAMEMODES.find(g => g.id === currentKit);
-            tableTitle.innerHTML = `<i class="fas fa-gamepad"></i> ${gamemode?.name || currentKit} Rankings - Tier Only`;
+            tableTitle.innerHTML = `<i class="fas fa-gamepad"></i> ${gamemode?.name || currentKit} Rankings - Tier Only (Best to Worst)`;
         }
     }
     
-    // Vygenerování hlavičky
     renderTableHeader();
     
-    // Seřazení hráčů podle aktuálního kitu
+    // Seřazení hráčů
     const sortedPlayers = sortPlayersByKit(players, currentKit);
     
     tbody.innerHTML = sortedPlayers.map((player, index) => {
@@ -122,7 +114,6 @@ function renderTable(players) {
         const titleTextColor = player.title.textColor || (player.title.name.includes('Novice') || player.title.name.includes('Cadet') ? '#0a0c15' : 'white');
         
         if (currentKit === 'overall') {
-            // OVERALL: zobraz všechny kity
             return `
                 <tr style="animation-delay: ${index * 0.02}s" onclick="showPlayerProfile('${player.name.replace(/'/g, "\\'")}')">
                     <td class="rank-cell">#${index + 1}</td>
@@ -135,11 +126,7 @@ function renderTable(players) {
                             <span class="player-name">${escapeHtml(player.name)}</span>
                         </div>
                     </td>
-                    <td>
-                        <span class="title-badge" style="background: ${titleColor}; color: ${titleTextColor}">
-                            ${player.title.name}
-                        </span>
-                    </td>
+                    <td><span class="title-badge" style="background: ${titleColor}; color: ${titleTextColor}">${player.title.name}</span></td>
                     <td class="points-cell">${player.totalPoints}</td>
                     ${GAMEMODES.map(gm => {
                         const tier = player[gm.id] || '-';
@@ -148,7 +135,6 @@ function renderTable(players) {
                 </tr>
             `;
         } else {
-            // KONKRÉTNÍ KIT: zobraz jen tier v daném kitu
             const tier = player[currentKit] || '-';
             return `
                 <tr style="animation-delay: ${index * 0.02}s" onclick="showPlayerProfile('${player.name.replace(/'/g, "\\'")}')">
@@ -162,11 +148,7 @@ function renderTable(players) {
                             <span class="player-name">${escapeHtml(player.name)}</span>
                         </div>
                     </td>
-                    <td>
-                        <span class="title-badge" style="background: ${titleColor}; color: ${titleTextColor}">
-                            ${player.title.name}
-                        </span>
-                    </td>
+                    <td><span class="title-badge" style="background: ${titleColor}; color: ${titleTextColor}">${player.title.name}</span></td>
                     <td class="points-cell">${player.totalPoints}</td>
                     <td class="kit-tier-cell"><span class="tier-badge tier-${tier === '-' ? 'empty' : tier}">${tier}</span></td>
                 </tr>
@@ -184,12 +166,4 @@ function setActiveSortButton() {
             btn.classList.add('active');
         }
     });
-}
-
-// Vynucení řazení od nejlepšího pro kity (při přepnutí)
-function forceBestToWorstSort() {
-    if (currentKit !== 'overall') {
-        currentSortDir = 'asc';
-        setActiveSortButton();
-    }
 }
